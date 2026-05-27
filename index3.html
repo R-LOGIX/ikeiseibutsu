@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医系生物(関担当分AI生成問題)</title>
+    <style>
+        :root {
+            --bg-color: #0a0f1d;
+            --card-bg: #131a30;
+            --text-color: #e2e8f0;
+            --accent-color: #00f2fe;
+            --success-color: #00e676;
+            --error-color: #ff1744;
+            --border-color: #222f54;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--accent-color);
+            letter-spacing: 2px;
+        }
+
+        .screen { display: none; }
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* メニュー画面 */
+        .menu-description {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .menu-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .text-btn {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .text-btn:hover {
+            background: rgba(0, 242, 254, 0.1);
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .q-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(34, 47, 84, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .q-checkbox-label:hover {
+            background: rgba(0, 242, 254, 0.08);
+            border-color: var(--accent-color);
+        }
+        .q-checkbox-label input {
+            accent-color: var(--accent-color);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* クイズ画面 */
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .question-text-area {
+            font-size: 1.15rem;
+            line-height: 2.2;
+            margin-bottom: 30px;
+        }
+
+        /* 空欄入力UI */
+        .input-wrapper {
+            display: inline-block;
+            position: relative;
+            margin: 0 4px;
+        }
+
+        .blank-input {
+            background: rgba(0, 242, 254, 0.05);
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px 4px 0 0;
+            font-size: 1.1rem;
+            text-align: center;
+            min-width: 120px;
+            max-width: 350px;
+            transition: all 0.3s;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .blank-input::placeholder {
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+        .blank-input:focus {
+            background: rgba(0, 242, 254, 0.15);
+            border-bottom-color: var(--accent-color);
+        }
+
+        /* 正誤判定スタイル */
+        .blank-input.correct {
+            border-bottom-color: var(--success-color);
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--success-color);
+        }
+        .blank-input.incorrect {
+            border-bottom-color: var(--error-color);
+            background: rgba(255, 23, 68, 0.15);
+            color: #ff8a80;
+            text-decoration: line-through;
+        }
+
+        .correct-reveal {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success-color);
+            color: #000;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-bottom: 4px;
+            box-shadow: 0 2px 8px rgba(0,230,118,0.4);
+        }
+        .correct-reveal::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -4px;
+            border-width: 4px;
+            border-style: solid;
+            border-color: var(--success-color) transparent transparent transparent;
+        }
+        .show-reveal .correct-reveal {
+            opacity: 1;
+        }
+
+        /* ボタン類 */
+        .btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #000;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: block;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+            filter: brightness(1.1);
+        }
+        .btn:disabled {
+            background: #2d3748;
+            color: #718096;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* 終了画面 */
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 6px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 30px auto;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+        }
+        .score-num { font-size: 2.5rem; font-weight: bold; color: #fff; }
+        .score-label { font-size: 0.9rem; color: #94a3b8; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>医系生物<br><span style="font-size:1.1rem; color:var(--accent-color);">関担当分AI生成問題</span></h1>
+
+    <div id="menu-screen" class="screen active">
+        <p class="menu-description">演習したい問題を選択してください。<br>（選択した問題を通しで解答します）</p>
+        
+        <div class="menu-controls">
+            <button class="text-btn" id="btn-select-all">すべて選択</button>
+            <button class="text-btn" id="btn-deselect-all">すべて解除</button>
+        </div>
+
+        <div class="question-grid" id="menu-grid">
+        </div>
+
+        <button class="btn" id="start-btn" disabled>選択した問題を開始</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="progress-header">
+            <span id="q-title">問1</span>
+            <span id="q-progress">1 / 7</span>
+        </div>
+
+        <div class="question-text-area" id="q-text-area">
+        </div>
+
+        <button class="btn" id="action-btn">解答をチェック</button>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2 style="text-align: center; margin-bottom: 10px;">演習完了</h2>
+        <p style="text-align: center; color: #94a3b8;">空欄の正答率</p>
+        <div class="score-circle">
+            <div class="score-num" id="final-score">0/0</div>
+            <div class="score-label">正解数</div>
+        </div>
+        <button class="btn" id="restart-btn" style="margin-top: 40px;">メニューへ戻る</button>
+    </div>
+</div>
+
+<script>
+    // --- 問題データベース (関担当分AI生成問題１～７) ---
+    const quizData = [
+        {
+            id: "関担当分AI生成問題１",
+            text: `<p><strong>＜進化・系統・生態分野＞</strong></p>
+            問1：1859年に出版された「On the Origin of Species…」で述べられた、ダーウィンが「より環境に適応したものが生存競争に勝って生き残った」と提唱した進化に関する考え(説)を答えよ。 [[1]]<br><br>
+            問2：木村資生が提唱した「分子進化に関する突然変異の多くは自然選択に対して有利でも不利でもなく、ほとんど無関係で、偶然に発生した中立な突然変異遺伝子が集団内へ固定する」という説をなんというか答えよ。 [[2]]<br><br>
+            問3：化石を産出する地層がどの地質年代に形成されたかを決定したり、離れた場所の地層と比較する手がかりとなる化石をなんというか答えよ。 [[3]]<br><br>
+            問4：ヒトの虫垂、耳筋、尾骨などのように、現在ではその機能が失われてしまった器官をなんというか答えよ。 [[4]]<br><br>
+            問5：DNAやRNAの塩基配列やタンパク質のアミノ酸配列の比較から、各遺伝子間の塩基(アミノ酸)置換数が推定される。この置換数を用いて作成したものをなんというか答えよ。 [[5]]<br><br>
+            問6：細胞内にあるミトコンドリアや葉緑体は、独立して生活していた真正細菌が進化の過程で水平的に真核細胞にとり込まれ、細胞小器官となったという説をなんというか答えよ。 [[6]]<br><br>
+            問7：相互に作用する無機的環境と生物群集をひとつのまとまりとして（物質循環とエネルギー流に注目して統一的に）捉えた系をなんというか答えよ。 [[7]]<br><br>
+            問8：生物群集内のすべての生物はお互いに食べるー食べられるという関係でつながっており、この一連の関係をなんというか答えよ。 [[8]]<br><br>
+            問9：生物が外界から取り込んだ物質を環境中におけるよりも高い濃度で生体内に蓄積する現象をなんというか答えよ。 [[9]]<br><br>
+            問10：地球で有機物ができて生命が誕生するまでの過程をなんというか答えよ。 [[10]]<br><br>
+            問11：2種の生物が密接に関係しながら生活する共生において、2種がお互いに正の効果を与える（利益を受ける）相互作用をなんというか。 [[11]]<br><br>
+            問12：共生において、生物両者が利益を受けるもの、あるいは片方のみが利益を受けるが、他方はまったく影響を受けないものをなんというか。 [[12]]<br><br>
+            <p><strong>＜免疫分野＞</strong></p>
+            問13：自然免疫の細胞がもつ抗原の膜、壁、ベン毛、DNAなどを認識する受容体を何というか答えよ。 [[13]]<br><br>
+            問14：免疫細胞によって認識される細胞膜表面のタンパク質をなんというかアルファベットで答えよ（ヒトではHLA）。 [[14]]`,
+            answers: {
+                "1": ["自然選択説", "自然淘汰説"], "2": ["中立説", "分子進化の中立説"], "3": ["示準化石"], "4": ["痕跡器官"], "5": ["系統樹"],
+                "6": ["細胞内共生説"], "7": ["生態系"], "8": ["食物連鎖"], "9": ["生物濃縮"], "10": ["化学進化"], "11": ["相利共生"],
+                "12": ["片利共生"], "13": ["Toll様受容体", "トル様受容体"], "14": ["MHC", "主要組織適合性遺伝子複合体"]
+            }
+        },
+        {
+            id: "関担当分AI生成問題２",
+            text: `多細胞生物での細胞分裂は個体を形成することと、精子や卵子といった生殖細胞を形成することの2つを意味している。細胞分裂は、1つの母細胞が2つの同じ大きさの娘細胞に分かれる現象をいう。この細胞分裂には体細胞の増殖を目的とした[[1]]と生殖細胞の形成を目的とした[[2]]がある。<br>
+            [[1]]の過程は、染色質が凝集して染色体となり核膜がみえなくなる前期、染色体が細胞の中央部に集まってくる前中期、染色体が赤道面に配列する中期、染色体が両極に移動する後期、それと両極で染色体が休止核に戻る終期に分けられる。<br><br>
+            体細胞分裂前期には、クロマチンが凝縮しはじめ、太くて短いコイル状の[[3]]になる。それぞれの[[3]]はすでに複製されていて、[[4]]と呼ばれる同じ遺伝情報をもつ2本の[[5]]からなり、[[6]]と呼ばれるタンパク質複合体によって接着して結びついている。2つの中心体がモータータンパク質であるキネシンによって両極に離れはじめる。また、[[7]]の構造が崩れはじめる。<br><br>
+            体細胞分裂前中期には[[8]]は完全にみえなくなり、[[9]]の二重構造が消失する。[[10]]が両極に到達し、その周囲の[[11]]からなる放射状の糸状構造をした[[12]]が発達しはじめる。2つの[[10]]から[[11]]が伸びて染色体のセントロメア上に形成された[[13]]に結合し、[[14]]が形成される。<br><br>
+            体細胞分裂中期には、染色体は分裂各期を通じてもっとも太くて短く凝縮し、[[4]]が明瞭となり、細胞の[[15]]面に整列する。この時期に、[[16]]チェックポイントが存在する。`,
+            answers: {
+                "1": ["体細胞分裂"], "2": ["減数分裂"], "3": ["染色体"], "4": ["姉妹染色分体"], "5": ["染色分体"],
+                "6": ["コヒーシン"], "7": ["ゴルジ装置"], "8": ["核小体"], "9": ["核膜"], "10": ["中心体"],
+                "11": ["微小管"], "12": ["星状体"], "13": ["動原体", "キネトコア"], "14": ["紡錘体"], "15": ["赤道"], "16": ["紡錘体"]
+            }
+        },
+        {
+            id: "関担当分AI生成問題３",
+            text: `体細胞分裂後期には、姉妹染色分体間を接着していた[[6]]が分解され、接着が解除される。そして、紡錘糸を構成するチューブリンが[[17]]することで次第に短くなり、各染色分体が両極に向けて移動する。<br><br>
+            体細胞分裂終期には、両極に到達した染色体は、コイルが解けて[[18]]し、クロマチンに戻る。前期に消失していた[[7]]、[[8]]、および[[9]]が再形成される。細胞の[[15]]付近で[[19]]と呼ばれるくびれが入りはじめる。細胞質分裂期には、アクチンやミオシンというタンパク質でできたミクロフィラメントからなる[[19]]が収縮してくびれが深くなり、細胞を2つの娘細胞に分ける。<br><br>
+            精子や卵子といわれる生殖細胞には、染色体が普通の体細胞(2n)の半数(n)しか含まれていない。これは生殖細胞が形成される分裂過程において、染色体数が[[20]]するために起こるものである。このような細胞分裂を[[2]]という。<br>
+            前期では、核内の糸状のクロマチン繊維(染色糸ともいう)がみられるようになり、相同なものどうしが側面で対合する。クロマチン繊維が太くなり染色体になると、2本の染色分体からなる[[21]]どうしが対合して4本の染色分体からなる[[22]]を形成する。[[22]]では、[[21]]どうしが対合によって一部の配列をとりかえる「[[23]]」が起きる。これにより、新たな遺伝子の組み合わせをもつ染色体が形成され、さらなる遺伝子多様性をもたらす。<br>
+            中期になると、微小管は星状体が離れるに従ってチューブリンが重合して伸びていく、これにより、[[22]]のセントロメアは赤道面に整列する。<br>
+            後期に至ると、[[22]]を形成している1組ずつの染色体が、紡錘体を形成するチューブリンの脱重合により別々の極へ移動していく。終期では、両極に分かれた染色体は脱凝縮して、その周りに核膜と核小体が形成される。そして、細胞質分裂が起こる。<br>
+            第一分裂によって生じた細胞には、[[21]]の[[24]]が含まれるので、染色体の数は[[20]]。間期を挟まずに第二分裂へと移行する。第二分裂では染色分体が分かれ、染色体数は[[25]]。<br><br>
+            <strong>＜計算・数値問題＞</strong><br>
+            問3：配偶子(精子・卵子)形成過程において、1つの一次精母細胞および一次卵母細胞から減数分裂を経てつくられる精子、卵子の数はそれぞれいくつか。答えよ。<br>
+            精子：[[精子]]つ、卵子：[[卵子]]つ`,
+            answers: {
+                "6": ["コヒーシン"], "7": ["ゴルジ装置"], "8": ["核小体"], "9": ["核膜"], "15": ["赤道"],
+                "2": ["減数分裂"], "17": ["脱重合"], "18": ["脱凝縮"], "19": ["分裂輪", "収縮環"], "20": ["半減"],
+                "21": ["相同染色体"], "22": ["二価染色体"], "23": ["交差", "相同組換え"], "24": ["一方のみ", "片方のみ"], "25": ["半減している"],
+                "精子": ["4"], "卵子": ["1"]
+            }
+        },
+        {
+            id: "関担当分AI生成問題４",
+            text: `細胞の死には、栄養不足、毒物、外傷などの外的環境要因による受動的細胞死で遺伝子に支配されない[[26]]と、個体の増殖制御でプログラムされた能動的細胞死で遺伝子の支配を受ける[[27]]の2種類がある。<br><br>
+            [[26]]が起こる過程では、外的環境要因によって[[28]]の機能が損なわれ、細胞膜が損傷されるため、細胞外から水が流入して細胞小器官・核・細胞が膨張し、細胞が破壊される。それが誘因となってその部位に[[29]]が遊走され、発熱や痛み、浮腫といった[[30]]が起こる。<br><br>
+            [[27]]の過程では細胞サイズの急速な縮小に続き、隣接細胞から離れ、核クロマチンの凝縮、[[31]]単位でのDNAの断片化、細胞の断片化が起こり、細胞膜のバリア機能を保ったまま[[32]]が形成される。細胞内の成分が漏れ出す前にマクロファージなどの組織球や周辺の細胞がこの[[32]]を[[33]]し、細胞の内容物の流出は起こらない。このため、内容物の流出の起こる[[26]]と異なり、[[30]]を伴わない。`,
+            answers: {
+                "26": ["ネクローシス"], "27": ["アポトーシス"], "28": ["ミトコンドリア"], "29": ["好中球"],
+                "30": ["炎症"], "31": ["ヌクレオソーム"], "32": ["アポトーシス小体"], "33": ["貪食"]
+            }
+        },
+        {
+            id: "関担当分AI生成問題５",
+            text: `ヒトは、さまざまな外部および内部の変化に対応して、内部の形態的あるいは生理的状態を一定に保って、その生存する性質をもっている。このような性質のことを[[34]]または[[35]]という。<br><br>
+            内分泌系においては、[[36]]という化学伝達物質によって情報が伝えられる。内分泌系に属する器官の細胞でつくられた[[36]]は、[[37]]から血液などに分泌され、離れた標的器官の細胞へ運ばれ、その標的細胞にある特異的な[[38]]に結合して情報を伝達する。<br><br>
+            [[39]]ホルモンは[[40]]の物質であるため、細胞膜を通過することができないので、細胞膜上にある[[38]]に結合し、情報が細胞内に伝達される。それに対して、[[41]]ホルモンは[[42]]の物質であるため、容易に細胞膜を通過できるので、細胞内に存在する[[43]]あるいは[[44]]に結合して、その作用を発揮する。<br><br>
+            ホルモンの量の調節について、低下した場合にその量を増加させるような調節を[[45]]、増加した場合にその量を低下させるような調節を[[46]]という。<br><br>
+            グルコースのホメオスタシスについて、[[47]]は食事後の血糖値(血中グルコース濃度)の上昇に伴って分泌され、肝臓や骨格筋において、グルコースから[[48]]への生合成を促進し、血糖値を低下させる。また、[[49]]は、肝臓や骨格筋におけるグルコースの分解を促進したり、糖新生をさせたりして血糖値を増加させる。`,
+            answers: {
+                "34": ["恒常性"], "35": ["ホメオスタシス"], "36": ["ホルモン"], "37": ["内分泌腺"], "38": ["受容体"],
+                "39": ["ペプチド"], "40": ["水溶性"], "41": ["ステロイド"], "42": ["脂溶性"],
+                "43": ["細胞質受容体", "核内受容体"], "44": ["核内受容体", "細胞質受容体"], // 順不同ペア対応
+                "45": ["正のフィードバック調節"], "46": ["負のフィードバック調節"], "47": ["インスリン"], "48": ["グリコーゲン"], "49": ["グルカゴン"]
+            }
+        },
+        {
+            id: "関担当分AI生成問題６",
+            text: `[[50]]（神経細胞）は細胞体、[[51]]、[[52]]からなる[[50]]は、神経系の興奮伝導の基本構成単位である。[[50]]と[[50]]との接合部を[[53]]という。同一神経細胞内で興奮が伝わることを[[54]]、[[53]]を介して興奮が伝わることを[[55]]という。有髄神経繊維の髄鞘が電気的絶縁体として機能をもっているため、活動電位は髄鞘間のランヴィエ絞輪にのみ発生する。興奮が活動電位を媒介としてランヴィエ絞輪からランヴィエ絞輪へと飛び飛びに伝導する現象を[[56]]という。[[55]]はアセチルコリンなどの[[57]]の放出によって行われる。<br><br>
+            神経細胞の興奮について、静止状態ではニューロンの細胞膜は膜内外のイオン濃度の差によって[[58]]している。神経が刺激を受けると、Na+チャネルが開口しNa+が細胞内に流入する。これによって、細胞の内側が+30mVを示し[[58]]が減少するので、[[59]]が起こる。この活動電位が生じることを特に[[60]]という。その後、K+が細胞外へ流出する。これによって、細胞内電位が再びマイナスへ傾き、[[61]]が起こる。<br><br>
+            病原微生物などから生体を防御する免疫応答機構として[[62]]免疫と[[63]]免疫の2つがある。病原微生物などの抗原による前感作が不要で、生まれながらにもっている防御機構を[[62]]免疫といい、生体が抗原と接触することによって後天的に適応される免疫反応を[[63]]免疫等という。[[63]]免疫には、抗体を産生する[[64]]免疫と細胞傷害性T細胞が標的細胞にアポトーシスを促す[[65]]免疫がある。<br><br>
+            [[64]]免疫では、マクロファージ・樹状細胞が[[66]]をしたのちに、[[67]]は活性化され、サイトカインを分泌し、[[68]]は分化・増殖し、形質細胞になる。形質細胞から免疫グロブリン(分泌型抗体)が産生・分泌される。抗原に抗体が結合し、[[69]]によりマクロファージが積極的に抗原を貪食する。`,
+            answers: {
+                "50": ["ニューロン"], "51": ["樹状突起", "軸索"], "52": ["軸索", "樹状突起"], // 順不同ペア対応
+                "53": ["シナプス"], "54": ["伝導"], "55": ["伝達"], "56": ["跳躍伝導"], "57": ["神経伝達物質"],
+                "58": ["分極"], "59": ["脱分極"], "60": ["興奮"], "61": ["再分極"], "62": ["自然"], "63": ["獲得"],
+                "64": ["体液性"], "65": ["細胞性"], "66": ["抗原提示"], "67": ["ヘルパーT細胞"], "68": ["B細胞"], "69": ["オプソニン効果"]
+            }
+        },
+        {
+            id: "関担当分AI生成問題７",
+            text: `[[70]]は、増幅させたいゲノムDNA、そのDNA領域を含む2種類の[[71]]、基質となる4種類のデオキシリボヌクレオシド三リン酸(dNTP)、[[72]]などをマイクロチューブに入れ、[[73]]、[[74]]、伸長反応を繰り返すことにより、特定のDNA領域をin vitro(体外)で指数的に増幅させる反応である。<br><br>
+            <strong>＜計算・数値問題＞</strong><br>
+            問1（PCRの増幅計算パターンA）：DNAコピーが4コピーあり、PCR（熱変性、アニーリング、伸長反応）を5回繰り返した場合のコピー数を答えよ。 [[A]] コピー<br><br>
+            問2（PCRの増幅計算パターンB）：DNAコピーが8コピーあり、PCRを5回繰り返した場合のコピー数を答えよ。 [[B]] コピー`,
+            answers: {
+                "70": ["PCR法"], "71": ["オリゴヌクレオチドプライマー", "プライマー"], "72": ["DNAポリメラーゼ", "耐熱性DNAポリメラーゼ"],
+                "73": ["熱変性", "アニーリング"], "74": ["アニーリング", "熱変性"], // 順不同ペア対応
+                "A": ["128"], "B": ["256"]
+            }
+        }
+    ];
+
+    // --- システム状態 ---
+    let selectedQuestions = [];
+    let currentQIndex = 0;
+    let isAnswerChecked = false;
+    let totalBlanks = 0;
+    let correctBlanks = 0;
+    let audioCtx = null;
+
+    // --- 音声生成 (Web Audio API) ---
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'click') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(500, now);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'success') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.1);
+            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'partial') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); osc.frequency.setValueAtTime(523.25, now + 0.1);
+            gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'fail') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(160, now); osc.frequency.setValueAtTime(140, now + 0.1);
+            gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        }
+    }
+
+    // --- メニュー構築 ---
+    const menuGrid = document.getElementById('menu-grid');
+    const startBtn = document.getElementById('start-btn');
+    
+    quizData.forEach((q, idx) => {
+        const label = document.createElement('label');
+        label.className = 'q-checkbox-label';
+        label.innerHTML = `<input type="checkbox" value="${idx}" class="q-select-cb" checked> ${q.id}`;
+        menuGrid.appendChild(label);
+    });
+
+    const updateStartBtn = () => {
+        const checked = document.querySelectorAll('.q-select-cb:checked').length;
+        startBtn.disabled = checked === 0;
+    };
+    document.querySelectorAll('.q-select-cb').forEach(cb => cb.addEventListener('change', updateStartBtn));
+
+    document.getElementById('btn-select-all').addEventListener('click', () => {
+        document.querySelectorAll('.q-select-cb').forEach(cb => cb.checked = true);
+        updateStartBtn();
+    });
+    document.getElementById('btn-deselect-all').addEventListener('click', () => {
+        document.querySelectorAll('.q-select-cb').forEach(cb => cb.checked = false);
+        updateStartBtn();
+    });
+
+    // --- クイズ進行ロジック ---
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    startBtn.addEventListener('click', () => {
+        initAudio();
+        playSound('click');
+        
+        selectedQuestions = Array.from(document.querySelectorAll('.q-select-cb:checked'))
+                                   .map(cb => quizData[parseInt(cb.value)]);
+        currentQIndex = 0;
+        totalBlanks = 0;
+        correctBlanks = 0;
+        
+        renderQuestion();
+        switchScreen('quiz-screen');
+    });
+
+    function renderQuestion() {
+        isAnswerChecked = false;
+        const q = selectedQuestions[currentQIndex];
+        
+        document.getElementById('q-title').textContent = q.id;
+        document.getElementById('q-progress').textContent = `${currentQIndex + 1} / ${selectedQuestions.length}`;
+        
+        let htmlText = q.text; // 元データに<br>等が含まれるため、そのまま使用
+        
+        // 正規表現で [[1]] などのマーカーを入力欄に置換
+        htmlText = htmlText.replace(/\[\[(.*?)\]\]/g, (match, key) => {
+            return `
+                <span class="input-wrapper">
+                    <input type="text" class="blank-input" data-key="${key}" placeholder="(${key})" autocomplete="off">
+                    <span class="correct-reveal"></span>
+                </span>
+            `;
+        });
+        
+        document.getElementById('q-text-area').innerHTML = htmlText;
+        
+        const actionBtn = document.getElementById('action-btn');
+        actionBtn.textContent = "解答をチェック";
+        
+        // 同一解答番号欄の入力内容同期とEnterキーのバインディング
+        document.querySelectorAll('.blank-input').forEach(inp => {
+            inp.addEventListener('input', (e) => {
+                const key = e.target.dataset.key;
+                const value = e.target.value;
+                document.querySelectorAll(`.blank-input[data-key="${key}"]`).forEach(otherInp => {
+                    if (otherInp !== e.target) {
+                        otherInp.value = value;
+                    }
+                });
+            });
+
+            inp.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') actionBtn.click();
+            });
+        });
+        
+        // 最初のインプットにフォーカス
+        setTimeout(() => {
+            const firstInput = document.querySelector('.blank-input');
+            if(firstInput) firstInput.focus();
+        }, 100);
+    }
+
+    // 文字列の揺れ吸収（全角英数を半角に、空白除去、大文字化、カッコなどの表記ブレ対応）
+    function normalizeString(str) {
+        return str.trim()
+            .replace(/[０-９ａ-ｚＡ-Ｚ]/g, function(s) {
+                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            })
+            .toUpperCase()
+            .replace(/[-－ー]/g, '-') // ハイフンの統一
+            .replace(/[()（）]/g, '') // カッコの除去（「または」表記の吸収用）
+            .replace(/\s+/g, '');
+    }
+
+    document.getElementById('action-btn').addEventListener('click', () => {
+        if (!isAnswerChecked) {
+            // 答え合わせフェーズ
+            isAnswerChecked = true;
+            const q = selectedQuestions[currentQIndex];
+            const inputs = document.querySelectorAll('.blank-input');
+            
+            let qCorrects = 0;
+            
+            // 順不同ペア（43/44, 51/52, 73/74など）の判定処理用オブジェクト
+            let pairKeys = {
+                "43": "44", "44": "43",
+                "51": "52", "52": "51",
+                "73": "74", "74": "73"
+            };
+            let checkedValues = {};
+
+            inputs.forEach(input => {
+                const key = input.dataset.key;
+                const userVal = normalizeString(input.value);
+                
+                let isCorrect = false;
+                let acceptableAnswers = q.answers[key].map(normalizeString);
+                
+                // 通常の答え合わせ
+                if (acceptableAnswers.includes(userVal)) {
+                    isCorrect = true;
+                } 
+                // 順不同ペアの答え合わせ（相方が持つ答えでも正解とする）
+                else if (pairKeys[key]) {
+                    let partnerKey = pairKeys[key];
+                    let partnerAnswers = q.answers[partnerKey].map(normalizeString);
+                    if (partnerAnswers.includes(userVal)) {
+                        isCorrect = true;
+                    }
+                }
+
+                const wrapper = input.parentElement;
+                const reveal = wrapper.querySelector('.correct-reveal');
+                
+                // 代表的な正解を表示（「または」の表記がある場合は1つ目を採用）
+                reveal.textContent = q.answers[key][0]; 
+
+                if (isCorrect && userVal !== "") {
+                    input.classList.add('correct');
+                    qCorrects++;
+                    correctBlanks++;
+                } else {
+                    input.classList.add('incorrect');
+                    wrapper.classList.add('show-reveal'); // 不正解時のみ正解をポップアップ
+                }
+                
+                input.readOnly = true;
+                totalBlanks++;
+            });
+
+            // 効果音判定
+            if (qCorrects === inputs.length && inputs.length > 0) {
+                playSound('success');
+            } else if (qCorrects > 0) {
+                playSound('partial');
+            } else {
+                playSound('fail');
+            }
+
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.textContent = currentQIndex === selectedQuestions.length - 1 ? "結果画面へ" : "次の問題へ";
+            
+        } else {
+            // 次へ進むフェーズ
+            playSound('click');
+            currentQIndex++;
+            if (currentQIndex < selectedQuestions.length) {
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        }
+    });
+
+    function showResult() {
+        switchScreen('result-screen');
+        document.getElementById('final-score').textContent = `${correctBlanks}/${totalBlanks}`;
+    }
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        playSound('click');
+        switchScreen('menu-screen');
+    });
+
+</script>
+
+</body>
+</html>
