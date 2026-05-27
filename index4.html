@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2022年度 医系生物 関担当分</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --surface-bg: rgba(22, 27, 34, 0.75);
+            --border-color: rgba(88, 166, 255, 0.2);
+            --text-main: #e6edf3;
+            --text-sub: #8b949e;
+            --accent-color: #58a6ff;
+            --accent-glow: rgba(88, 166, 255, 0.4);
+            --correct-color: #3fb950;
+            --incorrect-color: #f85149;
+            --essay-color: #bc8cff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            background: radial-gradient(circle at 50% 0%, #161b22 0%, #0d1117 80%);
+            color: var(--text-main);
+            line-height: 1.8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1000px;
+            padding: 40px 20px 20px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #58a6ff, #bc8cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        main {
+            width: 100%;
+            max-width: 1000px;
+            padding: 0 20px 50px 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* メニュー画面 */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .menu-btn {
+            background: var(--surface-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px 20px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .menu-btn:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-3px);
+            background: rgba(33, 38, 45, 0.9);
+        }
+
+        .menu-btn .btn-title {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .menu-btn .btn-desc {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        /* 問題演習画面 */
+        .card {
+            background: var(--surface-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            color: var(--text-sub);
+            font-size: 1rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+
+        .q-text {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            text-align: justify;
+        }
+
+        /* 入力エリアのデザイン */
+        input[type="text"] {
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid transparent;
+            border-bottom: 2px solid var(--accent-color);
+            color: #ffffff;
+            font-size: 1.1rem;
+            padding: 4px 8px;
+            margin: 2px 6px;
+            width: 140px;
+            text-align: center;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            background: rgba(88, 166, 255, 0.1);
+            border-bottom-color: #79c0ff;
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.15);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(88, 166, 255, 0.4);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"].correct {
+            border-bottom-color: var(--correct-color);
+            color: var(--correct-color);
+            background: rgba(63, 185, 80, 0.1);
+            font-weight: bold;
+        }
+
+        input[type="text"].incorrect {
+            border-bottom-color: var(--incorrect-color);
+            color: var(--incorrect-color);
+            background: rgba(248, 81, 73, 0.1);
+        }
+
+        .feedback-ans {
+            color: var(--correct-color);
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-left: 4px;
+            margin-right: 8px;
+            display: inline-block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* 論述問題 */
+        .essay-block {
+            background: linear-gradient(90deg, rgba(188, 140, 255, 0.08) 0%, transparent 100%);
+            border-left: 4px solid var(--essay-color);
+            padding: 15px 25px;
+            margin: 25px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .essay-title {
+            color: var(--essay-color);
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* テーブル */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        /* コントロールボタン */
+        .controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: #ffffff;
+            flex-grow: 2;
+            box-shadow: 0 4px 15px rgba(46, 160, 67, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 160, 67, 0.4);
+            background: linear-gradient(135deg, #2ea043, #3fb950);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.1);
+            flex-grow: 1;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>2022年度 医系生物 過去問演習</h1>
+        <p>関担当分 (全11問収録)</p>
+    </header>
+
+    <main>
+        <section id="menu-view" class="view-section active">
+            <div class="menu-grid" id="menu-grid"></div>
+        </section>
+
+        <section id="quiz-view" class="view-section">
+            <div class="progress-bar">
+                <span id="display-title">問1</span>
+                <span id="display-page">Page 1 / 1</span>
+            </div>
+            <div class="card">
+                <div id="quiz-content" class="q-text"></div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="returnToMenu()">メニューへ戻る</button>
+                <button class="btn btn-primary" id="action-btn" onclick="processAction()">採点する</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ==========================================
+        // 効果音エンジン (Web Audio API)
+        // ==========================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'incorrect') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // ==========================================
+        // 過去問 全データ構造
+        // ==========================================
+        const dataset = [
+            {
+                id: 1, title: "問1", desc: "生命の誕生と進化論",
+                pages: [
+                    {
+                        html: `次の問いに答えよ。<br><br>
+                        [1] 地球で有機物ができて生命が誕生するまでの過程をなんというか答えよ。<br>➔ [[1]]<br><br>
+                        [2] 現代の進化論のうち、ダーウィンが提唱した説を答えよ。<br>➔ [[2]]<br><br>
+                        [3] 木村資生が「分子進化に関与する突然変異の多くは自然選択に対して有利でも不利でもなく、ほとんど無関係で、偶然に発生した突然変異遺伝子が集団内へ固定する」と提唱した説を答えよ。<br>➔ [[3]]<br><br>
+                        [4] 細胞内にあるミトコンドリアや葉緑体は独立して生活していた真正細菌が進化の過程で水平的に真核細胞に取り込まれ、細胞小器官となったとされる。この説をなんというか答えよ。<br>➔ [[4]]<br><br>
+                        [5] DNAやRNAの塩基配列やタンパク質のアミノ酸配列の比較から、各遺伝子間の塩基(アミノ酸)置換数が推定される。この置換数を用いて系統樹を作成することが可能であるが、このような系統樹をなんというか答えよ。<br>➔ [[5]]`,
+                        answers: {
+                            "1": ["化学進化"], "2": ["自然選択説"], "3": ["中立説"], "4": ["細胞内共生説"], "5": ["分子系統樹"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 2, title: "問2", desc: "PCR法とウイルスの検出",
+                pages: [
+                    {
+                        html: `[1] 次の文章中にあてはまる語句を答えよ。<br><br>
+                        [[1]] は、増幅させたいゲノムDNA、そのDNA領域を含む2種類のオリゴヌクレオチドプライマー、基質となる4種類のデオキシリボヌクレオシド三リン酸(dNTP)、[[2]] などをマイクロチューブに入れ、[[3]]、[[4]]、[[5]] を繰り返すことにより、特定のDNA領域をin vitro(体外)で指数的に増幅させる反応である。<br><br>
+                        [2] DNAコピーが8コピーあり、PCRにより、問2［1］の[[3]]、[[4]]、[[5]]を5回繰り返した場合のコピー数を答えよ。<br>➔ [[6]]<br><br>
+                        <div class="essay-block">
+                            <div class="essay-title">[3] 論述問題（解答欄省略）</div>
+                            <p>RNAウイルスである新型コロナウイルスへの感染をどのような手順で検出するか、［1］の(1)の方法を用いて、「逆転写反応」を交えながら説明してください。</p>
+                        </div>`,
+                        answers: {
+                            "1": ["PCR法", "PCR"], "2": ["耐熱性ポリメラーゼ", "耐熱性DNAポリメラーゼ"], 
+                            "3": ["熱変性"], "4": ["アニーリング"], "5": ["伸長反応"], 
+                            "6": ["256コピー", "256", "２５６"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 3, title: "問3", desc: "体細胞分裂と減数分裂の比較",
+                pages: [
+                    {
+                        html: `体細胞分裂と減数分裂の特徴を表した次の表について、空欄にあてはまる適切な内容を記入しなさい。<br><br>
+                        <table>
+                            <tr>
+                                <th>特徴</th>
+                                <th>体細胞分裂</th>
+                                <th>減数分裂</th>
+                            </tr>
+                            <tr>
+                                <td><b>目的</b></td>
+                                <td>[[1]]</td>
+                                <td>[[6]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>分裂回数</b></td>
+                                <td>[[2]]</td>
+                                <td>[[7]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>娘細胞の個数</b></td>
+                                <td>[[3]]</td>
+                                <td>[[8]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>娘細胞の染色体数</b></td>
+                                <td>[[4]]</td>
+                                <td>[[9]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>娘細胞の染色体の構成</b></td>
+                                <td>[[5]]</td>
+                                <td>[[10]]</td>
+                            </tr>
+                        </table>
+                        <span style="font-size:0.9rem; color:var(--text-sub);">※ヒント（以下を参考に解答してください）：<br>
+                        目的: 体細胞の増殖 / 生殖細胞の形成<br>
+                        分裂回数: 1回 / 2回<br>
+                        娘細胞の個数: 2個 / 4個<br>
+                        娘細胞の染色体数: 母細胞と同じ / 母細胞から半減<br>
+                        娘細胞の染色体の構成: 母細胞と同じ / 生殖細胞ごとに異なる</span>`,
+                        answers: {
+                            "1": ["体細胞の増殖"], "2": ["1回", "１回", "1", "１"], "3": ["2個", "２個", "2", "２"], "4": ["母細胞と同じ"], "5": ["母細胞と同じ"],
+                            "6": ["生殖細胞の形成"], "7": ["2回", "２回", "2", "２"], "8": ["4個", "４個", "4", "４"], "9": ["母細胞から半減", "半減"], "10": ["生殖細胞ごとに異なる", "異なる"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 4, title: "問4", desc: "体細胞分裂の各期の挙動 (1/3)",
+                pages: [
+                    {
+                        html: `次の文章中にあてはまる語句を解答欄に記入しなさい。（語群は省略しています）<br><br>
+                        クロマチンとは、真核細胞の [[1]] 内に存在する [[2]] とタンパク質の複合体で、5種類の [[3]] タンパク質に [[2]] が巻き付いた [[4]] が折りたたまれたものである。<br><br>
+                        体細胞分裂前期には、クロマチンが凝縮しはじめ、太くて短いコイル状の染色体になる。それぞれの染色体は、[[5]] と呼ばれる同じ遺伝情報をもつ2本の [[6]] からなり、[[7]] と呼ばれるタンパク質複合体によって接着して結びついている。2つの中心体がモータータンパク質であるキネシンによって両極に離れはじめる。また、[[8]] の構造が崩れはじめる。`,
+                        answers: {
+                            "1": ["核"], "2": ["DNA"], "3": ["ヒストン"], "4": ["ヌクレオソーム"], 
+                            "5": ["姉妹染色分体"], "6": ["染色分体"], "7": ["コヒーシン"], "8": ["ゴルジ装置"]
+                        }
+                    },
+                    {
+                        html: `問4 続き<br><br>
+                        体細胞分裂中期には [[9]] は完全にみえなくなり、[[10]] の二重構造が消失する。[[11]] が両極に到達し、その周囲の [[12]] からなる放射状の糸状構造をした [[13]] が発達しはじめる。2つの [[11]] から [[12]] が伸びて染色体のセントロメア上に形成された [[14]] に結合し、[[15]] が形成される。<br><br>
+                        体細胞分裂中期には、染色体は分裂各期を通じてもっとも太くて短く凝縮し、[[6]] が明瞭となり、細胞の [[16]] 面に整列する。この時期に、[[17]] チェックポイントが存在する。`,
+                        answers: {
+                            "9": ["核小体"], "10": ["核膜"], "11": ["中心体"], "12": ["微小管"], 
+                            "13": ["星状体"], "14": ["キネトコア"], "15": ["紡錘体"], "6": ["染色分体"], "16": ["赤道"], "17": ["紡錘体形成"]
+                        }
+                    },
+                    {
+                        html: `問4 続き<br><br>
+                        体細胞分裂後期には、[[5]] を接着していた [[7]] が分解され、接着が解除される。そして、紡錘糸を構成するチューブリンが [[18]] することで次第に短くなり、各染色分体が両極に向けて移動する。<br><br>
+                        体細胞分裂終期には、両極に到達した染色体は、コイルが解けて [[19]] し、クロマチンに戻る。前期に消失していた [[8]]、[[9]]、および [[10]] が再形成される。細胞の [[16]] 付近で [[20]] と呼ばれるくびれが入りはじめる。<br><br>
+                        細胞質分裂期には、アクチンやミオシンというタンパク質でできたミクロフィラメントからなる [[20]] が収縮してくびれが深くなり、細胞を2つの娘細胞に分ける。`,
+                        answers: {
+                            "5": ["姉妹染色分体"], "7": ["コヒーシン"], "18": ["脱重合"], "19": ["脱凝縮"],
+                            "8": ["ゴルジ装置"], "9": ["核小体"], "10": ["核膜"], "16": ["赤道"], "20": ["収縮環"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 5, title: "問5", desc: "減数分裂のプロセス",
+                pages: [
+                    {
+                        html: `次の文中のカッコ内に入れる最も適切なものを解答欄に記せ。（語群省略）<br><br>
+                        精子や卵子といわれる生殖細胞には、染色体が普通の体細胞(2n)の半数(n)しか含まれていない。これは生殖細胞が形成される分裂過程において、染色体数が半減するために起こるものである。このような細胞分裂を [[1]] という。<br><br>
+                        前期では、核内の糸状のクロマチン繊維がみられるようになり、相同なものどうしが側面で対合する。クロマチン繊維が太くなり染色体になると、2本の染色分体からなる [[2]] どうしが対合して4本の染色分体からなる [[3]] を形成する。[[3]] では、[[2]] どうしが [[4]] によって一部の配列をとりかえる「相同組換え」が起きる。<br><br>
+                        中期になると、微小管は星状体が離れるに従ってチューブリンが重合して伸びていく。これにより、[[3]] のセントロメアは赤道面に整列する。<br><br>
+                        後期に至ると、[[3]] を形成している1組ずつの染色体が、紡錘体を形成するチューブリンの脱重合により別々の極へ移動していく。<br><br>
+                        第一分裂によって生じた細胞には、[[3]] の [[5]] が含まれるので、染色体の数は [[6]]。間期を挟まずに第二分裂へと移行する。<br><br>
+                        第二分裂では、第一分裂で生じた2個の細胞が体細胞分裂と同様なしくみで染色体の分配が行われる。4つの娘細胞が形成される。第二分裂では染色分体が分かれ、染色体数は [[7]]。`,
+                        answers: {
+                            "1": ["減数分裂"], "2": ["相同染色体"], "3": ["二価染色体"], "4": ["交差"], 
+                            "5": ["一方のみ"], "6": ["変わらない"], "7": ["半減している", "半減する"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 6, title: "問6", desc: "細胞死（ネクローシスとアポトーシス）",
+                pages: [
+                    {
+                        html: `細胞死について述べた以下の文について、文中のカッコ内に入る最も適切なものを解答欄に記せ。<br><br>
+                        [[1]] が起こる過程では、外的環境要因によってミトコンドリアの機能が損なわれ、[[2]] が損傷されるため、細胞外から水が流入して細胞小器官・核・細胞が膨張し、細胞が破壊される。それが誘因となってその部位に [[3]] され、発熱や痛み、浮腫といった [[4]] が起こる。<br><br>
+                        [[5]] の過程では細胞サイズの急速な縮小に続き、隣接細胞から離れ、核クロマチンの凝縮、[[6]]、細胞の断片化が起こり、細胞膜のバリア機能を保ったまま [[7]] が形成される。細胞内の成分が漏れ出す前にマクロファージなどの組織球や周辺の細胞がこの [[7]] を [[8]] し、細胞の内容物の流出は起こらない。`,
+                        answers: {
+                            "1": ["ネクローシス"], "2": ["細胞膜"], "3": ["好中球が遊走"], "4": ["炎症"],
+                            "5": ["アポトーシス"], "6": ["ヌクレオソーム単位でのDNAの断片化", "DNAの断片化"], 
+                            "7": ["アポトーシス小体"], "8": ["貪食"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 7, title: "問7", desc: "正常細胞と癌細胞の特徴",
+                pages: [
+                    {
+                        html: `正常細胞あるいは癌細胞の特徴を表した次の表について、あてはまるものには「○」、あてはまらないものには「×」を入力しなさい。<br><br>
+                        <table>
+                            <tr>
+                                <th>特徴</th>
+                                <th>正常細胞</th>
+                                <th>癌細胞</th>
+                            </tr>
+                            <tr>
+                                <td><b>自律性増殖</b></td>
+                                <td>[[1]]</td>
+                                <td>[[6]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>足場依存性</b></td>
+                                <td>[[2]]</td>
+                                <td>[[7]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>細胞増殖の接触阻止を示す</b></td>
+                                <td>[[3]]</td>
+                                <td>[[8]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>脱分化</b></td>
+                                <td>[[4]]</td>
+                                <td>[[9]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>不死化</b></td>
+                                <td>[[5]]</td>
+                                <td>[[10]]</td>
+                            </tr>
+                        </table>`,
+                        answers: {
+                            "1": ["×", "x", "X", "✕"], "2": ["○", "〇", "O", "o", "◯"], "3": ["○", "〇", "O", "o", "◯"], "4": ["×", "x", "X", "✕"], "5": ["×", "x", "X", "✕"],
+                            "6": ["○", "〇", "O", "o", "◯"], "7": ["×", "x", "X", "✕"], "8": ["×", "x", "X", "✕"], "9": ["○", "〇", "O", "o", "◯"], "10": ["○", "〇", "O", "o", "◯"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 8, title: "問8", desc: "免疫応答と受容体",
+                pages: [
+                    {
+                        html: `[1] 次の文章中にあてはまる語句を答えよ。<br><br>
+                        病原微生物などから生体を防御する免疫応答機構として [[1]] 免疫と [[2]] 免疫の2つがある。病原微生物などの抗原による前感作が不要で、生まれながらにもっている防御機構を [[1]] 免疫といい、生体が抗原と接触することによって後天的に適応される免疫反応を [[2]] 免疫等という。[[2]] には、抗体を産生する [[3]] 免疫と細胞傷害性T細胞が標的細胞にアポトーシスを促す [[4]] 免疫がある。<br><br>
+                        [[3]] 免疫では、マクロファージ・樹状細胞が [[5]] をしたのちに、[[6]] は活性化され、サイトカインを分泌し、[[7]] は分化・増殖し、形質細胞になる。形質細胞から免疫グロブリン(分泌型抗体)が産生・分泌される。<br><br>
+                        [[4]] 免疫では、細胞傷害性T細胞を活性化し、パーフォリンやグランザイムを分泌して、標的細胞にアポトーシスを誘導する。<br><br>
+                        [2] [[1]] 免疫の細胞がもつ抗原の膜、壁、鞭毛、DNAなどを認識する受容体を何というか答えよ。<br>➔ [[8]]<br><br>
+                        [3] 免疫細胞によって認識される細胞膜表面のタンパク質をなんというかアルファベットで答えよ（ヒトではHLA）。<br>➔ [[9]]`,
+                        answers: {
+                            "1": ["自然"], "2": ["獲得"], "3": ["体液性"], "4": ["細胞性"], 
+                            "5": ["抗原提示"], "6": ["T細胞", "ヘルパーT細胞"], "7": ["B細胞"], 
+                            "8": ["Toll様受容体"], "9": ["MHC"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 9, title: "問9", desc: "ホメオスタシスと神経・内分泌 (1/3)",
+                pages: [
+                    {
+                        html: `以下の文章の空欄に入る適切な言葉を選択し、解答欄に記載せよ。（語群省略）<br><br>
+                        ヒトは、さまざまな外部および内部の変化に対応して、内部の形態的あるいは生理的状態を一定に保って、その生存する性質をもっている。このような性質のことを [[1]] または [[2]] という。[[1]] は、[[3]] の変化に対して [[4]] を一定に保つ働きということもできる。<br><br>
+                        内分泌系においては、[[5]] という化学伝達物質によって情報が伝えられる。[[5]] は [[6]] から血液などに分泌され、標的細胞の [[7]] に結合する。`,
+                        answers: {
+                            "1": ["恒常性"], "2": ["ホメオスタシス"], "3": ["外部環境"], "4": ["内部環境"], 
+                            "5": ["ホルモン"], "6": ["内分泌腺"], "7": ["受容体"]
+                        }
+                    },
+                    {
+                        html: `問9 続き<br><br>
+                        ステロイドホルモンなどは [[8]] のホルモンである。細胞膜を通過できるため、受容体は [[9]] または [[10]] として存在する。これらの受容体には [[11]] が共通に存在し、[[12]] へ結合し遺伝子発現を調節する。<br><br>
+                        [[13]] は血糖値上昇に伴い分泌され、グリコーゲン合成を促進し血糖値を低下させる（[[14]]）。グルカゴンは血糖値を増加させる（[[15]]）。`,
+                        answers: {
+                            "8": ["脂溶性"], "9": ["細胞質受容体", "核内受容体"], "10": ["核内受容体", "細胞質受容体"], 
+                            "11": ["転写調節因子", "転写調節因子ドメイン"], "12": ["応答配列"], "13": ["インスリン"], 
+                            "14": ["負のフィードバック調節"], "15": ["正のフィードバック調節"]
+                        }
+                    },
+                    {
+                        html: `問9 続き<br><br>
+                        [[16]]（神経細胞）は細胞体、[[17]]、[[18]] からなる。[[16]] 同士の接合部を [[19]] という。同一細胞内の興奮伝播を [[20]]、シナプスを介したものを [[21]] といい、[[22]] の放出によって行われる。静止状態の膜電位を [[23]]・[[24]] といい、刺激による脱分極を [[25]]・[[26]] という。興奮後、次の興奮が起こせない期間を [[27]] という。`,
+                        answers: {
+                            "16": ["ニューロン"], "17": ["樹状突起", "軸索"], "18": ["軸索", "樹状突起"], 
+                            "19": ["シナプス"], "20": ["伝導"], "21": ["伝達"], "22": ["神経伝達物質"], 
+                            "23": ["分極"], "24": ["静止電位", "膜電位"], "25": ["脱分極"], "26": ["興奮"], "27": ["不応期"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 10, title: "問10", desc: "人類の進化 (猿人と新人)",
+                pages: [
+                    {
+                        html: `猿人と新人(現代人)の特徴を表した次の表について、あてはまる適切な語句を入力しなさい。<br><br>
+                        <table>
+                            <tr>
+                                <th>特徴</th>
+                                <th>猿人</th>
+                                <th>新人(現代人)</th>
+                            </tr>
+                            <tr>
+                                <td><b>大後頭孔</b></td>
+                                <td>[[1]]</td>
+                                <td>[[4]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>眼窩上隆起</b></td>
+                                <td>[[2]]</td>
+                                <td>[[5]]</td>
+                            </tr>
+                            <tr>
+                                <td><b>おとがい</b></td>
+                                <td>[[3]]</td>
+                                <td>[[6]]</td>
+                            </tr>
+                        </table>
+                        <span style="font-size:0.9rem; color:var(--text-sub);">※ヒント（以下を参考に解答してください）：<br>
+                        大後頭孔: 真下 / 斜め後方<br>
+                        眼窩上隆起: あり / なし<br>
+                        おとがい: あり / なし</span>`,
+                        answers: {
+                            "1": ["斜め後方"], "2": ["あり"], "3": ["なし"],
+                            "4": ["真下"], "5": ["なし"], "6": ["あり"]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 11, title: "問11", desc: "遺伝子工学的手法によるインスリン産生",
+                pages: [
+                    {
+                        html: `次の問いに答えよ。（論述問題のため解答欄は省略しています）<br><br>
+                        <div class="essay-block">
+                            <div class="essay-title">論述問題</div>
+                            <p>1920年代は、ブタやウシの膵臓から精製していたが、遺伝子工学的な手法により人工的にヒトインスリンの産生が可能になった。<br><br>
+                            ヒトインスリンを遺伝子工学の手法を用いて産生する方法を具体的に記してください。また、ブタやウシの膵臓から精製するよりも人工ヒトインスリンを利用した場合の利点を答えよ。</p>
+                        </div>`,
+                        answers: {}
+                    }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // 状態管理変数
+        // ==========================================
+        let currentQuestion = null;
+        let currentPageIdx = 0;
+        let globalAnswers = {}; // ページ内でのリアルタイム同期用
+        let isGraded = false;
+
+        const menuView = document.getElementById('menu-view');
+        const quizView = document.getElementById('quiz-view');
+        const menuGrid = document.getElementById('menu-grid');
+        const quizContent = document.getElementById('quiz-content');
+        const actionBtn = document.getElementById('action-btn');
+        const displayTitle = document.getElementById('display-title');
+        const displayPage = document.getElementById('display-page');
+
+        // ==========================================
+        // UI制御
+        // ==========================================
+        function initMenu() {
+            menuGrid.innerHTML = "";
+            dataset.forEach(q => {
+                const btn = document.createElement('div');
+                btn.className = "menu-btn";
+                btn.onclick = () => selectQuestion(q.id);
+                btn.innerHTML = `
+                    <div class="btn-title">${q.title}</div>
+                    <div class="btn-desc">${q.desc}</div>
+                `;
+                menuGrid.appendChild(btn);
+            });
+        }
+
+        function selectQuestion(id) {
+            playSound('click');
+            currentQuestion = dataset.find(q => q.id === id);
+            currentPageIdx = 0;
+            globalAnswers = {};
+            
+            menuView.classList.remove('active');
+            quizView.classList.add('active');
+            renderPage();
+        }
+
+        function returnToMenu() {
+            playSound('click');
+            quizView.classList.remove('active');
+            menuView.classList.add('active');
+            initMenu();
+        }
+
+        function renderPage() {
+            isGraded = false;
+            const page = currentQuestion.pages[currentPageIdx];
+            displayTitle.innerText = currentQuestion.title;
+            displayPage.innerText = `Page ${currentPageIdx + 1} / ${currentQuestion.pages.length}`;
+            
+            // [[n]] をプレースホルダー付きinputに置換
+            let processedHtml = page.html.replace(/\[\[(\d+)\]\]/g, (match, num) => {
+                return `<input type="text" class="quiz-input" data-qid="${num}" placeholder="[${num}]">`;
+            });
+            
+            quizContent.innerHTML = processedHtml;
+            actionBtn.innerText = "採点する";
+
+            // イベントバインドと同一ページ内同期
+            const inputs = quizContent.querySelectorAll('.quiz-input');
+            inputs.forEach(input => {
+                const qid = input.getAttribute('data-qid');
+                if (globalAnswers[qid]) {
+                    input.value = globalAnswers[qid];
+                }
+                
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    globalAnswers[qid] = value;
+                    const peers = quizContent.querySelectorAll(`.quiz-input[data-qid="${qid}"]`);
+                    peers.forEach(peer => { if (peer !== e.target) peer.value = value; });
+                });
+            });
+        }
+
+        function processAction() {
+            if (!isGraded) {
+                gradePage();
+            } else {
+                nextStep();
+            }
+        }
+
+        function gradePage() {
+            const page = currentQuestion.pages[currentPageIdx];
+            const inputs = quizContent.querySelectorAll('.quiz-input');
+            let allCorrect = true;
+
+            if (inputs.length === 0) {
+                // 入力欄がない（論述のみ）場合
+                playSound('correct');
+                isGraded = true;
+                advanceButtonState();
+                return;
+            }
+
+            // 採点処理
+            inputs.forEach(input => {
+                input.disabled = true;
+                const qid = input.getAttribute('data-qid');
+                const userAns = input.value.trim();
+                const validList = page.answers[qid] || [];
+
+                const isCorrect = validList.some(correct => correct === userAns);
+
+                if (isCorrect) {
+                    input.classList.add('correct');
+                } else {
+                    input.classList.add('incorrect');
+                    allCorrect = false;
+                    
+                    const feedback = document.createElement('span');
+                    feedback.className = 'feedback-ans';
+                    feedback.innerText = `(${validList[0]})`;
+                    input.parentNode.insertBefore(feedback, input.nextSibling);
+                }
+            });
+
+            if (allCorrect) {
+                playSound('correct');
+            } else {
+                playSound('incorrect');
+            }
+
+            isGraded = true;
+            advanceButtonState();
+        }
+
+        function advanceButtonState() {
+            if (currentPageIdx < currentQuestion.pages.length - 1) {
+                actionBtn.innerText = "次のページへ";
+            } else {
+                actionBtn.innerText = "メニューへ戻る";
+            }
+        }
+
+        function nextStep() {
+            playSound('click');
+            if (currentPageIdx < currentQuestion.pages.length - 1) {
+                currentPageIdx++;
+                renderPage();
+            } else {
+                returnToMenu();
+            }
+        }
+
+        // アプリケーション開始
+        initMenu();
+    </script>
+</body>
+</html>
