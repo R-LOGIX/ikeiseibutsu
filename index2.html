@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医系生物(空欄補充・記述式)</title>
+    <style>
+        :root {
+            --bg-color: #0a0f1d;
+            --card-bg: #131a30;
+            --text-color: #e2e8f0;
+            --accent-color: #00f2fe;
+            --success-color: #00e676;
+            --error-color: #ff1744;
+            --border-color: #222f54;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--accent-color);
+            letter-spacing: 2px;
+        }
+
+        .screen { display: none; }
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* メニュー画面 */
+        .menu-description {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .menu-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .text-btn {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .text-btn:hover {
+            background: rgba(0, 242, 254, 0.1);
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .q-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(34, 47, 84, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .q-checkbox-label:hover {
+            background: rgba(0, 242, 254, 0.08);
+            border-color: var(--accent-color);
+        }
+        .q-checkbox-label input {
+            accent-color: var(--accent-color);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* クイズ画面 */
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .question-text-area {
+            font-size: 1.15rem;
+            line-height: 2.2;
+            margin-bottom: 30px;
+        }
+
+        /* 空欄入力UI */
+        .input-wrapper {
+            display: inline-block;
+            position: relative;
+            margin: 0 4px;
+        }
+
+        .blank-input {
+            background: rgba(0, 242, 254, 0.05);
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px 4px 0 0;
+            font-size: 1.1rem;
+            text-align: center;
+            min-width: 100px;
+            max-width: 250px;
+            transition: all 0.3s;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .blank-input::placeholder {
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+        .blank-input:focus {
+            background: rgba(0, 242, 254, 0.15);
+            border-bottom-color: var(--accent-color);
+        }
+
+        /* 正誤判定スタイル */
+        .blank-input.correct {
+            border-bottom-color: var(--success-color);
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--success-color);
+        }
+        .blank-input.incorrect {
+            border-bottom-color: var(--error-color);
+            background: rgba(255, 23, 68, 0.15);
+            color: #ff8a80;
+            text-decoration: line-through;
+        }
+
+        .correct-reveal {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success-color);
+            color: #000;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            margin-bottom: 4px;
+            box-shadow: 0 2px 8px rgba(0,230,118,0.4);
+        }
+        .correct-reveal::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -4px;
+            border-width: 4px;
+            border-style: solid;
+            border-color: var(--success-color) transparent transparent transparent;
+        }
+        .show-reveal .correct-reveal {
+            opacity: 1;
+        }
+
+        /* ボタン類 */
+        .btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #000;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: block;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+            filter: brightness(1.1);
+        }
+        .btn:disabled {
+            background: #2d3748;
+            color: #718096;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* 終了画面 */
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 6px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 30px auto;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+        }
+        .score-num { font-size: 2.5rem; font-weight: bold; color: #fff; }
+        .score-label { font-size: 0.9rem; color: #94a3b8; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>医系生物<br><span style="font-size:1.1rem; color:var(--accent-color);">空欄補充アプリ</span></h1>
+
+    <div id="menu-screen" class="screen active">
+        <p class="menu-description">演習したい問題を選択してください。<br>（選択した問題を通しで解答します）</p>
+        
+        <div class="menu-controls">
+            <button class="text-btn" id="btn-select-all">すべて選択</button>
+            <button class="text-btn" id="btn-deselect-all">すべて解除</button>
+        </div>
+
+        <div class="question-grid" id="menu-grid">
+            </div>
+
+        <button class="btn" id="start-btn" disabled>選択した問題を開始</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="progress-header">
+            <span id="q-title">問1</span>
+            <span id="q-progress">1 / 5</span>
+        </div>
+
+        <div class="question-text-area" id="q-text-area">
+            </div>
+
+        <button class="btn" id="action-btn">解答をチェック</button>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2 style="text-align: center; margin-bottom: 10px;">演習完了</h2>
+        <p style="text-align: center; color: #94a3b8;">空欄の正答率</p>
+        <div class="score-circle">
+            <div class="score-num" id="final-score">0/0</div>
+            <div class="score-label">正解数</div>
+        </div>
+        <button class="btn" id="restart-btn" style="margin-top: 40px;">メニューへ戻る</button>
+    </div>
+</div>
+
+<script>
+    // --- 問題データベース ---
+    const quizData = [
+        {
+            id: "問1",
+            text: `1. それ以上に加水分解できない糖を[[1]]と呼ぶ。[[1]]は不斉炭素原子をもつため、D体とL体と呼ばれる[[2]]が存在する。一般的に[[3]]体として存在する。環状構造をとる場合、閉環する位置の炭素原子が不斉炭素原子となるため、α[[4]]とβ[[4]]と呼ばれる2種類の異性体が存在する。\n\n2. 多数の[[1]]が[[5]]結合によって脱水縮合して1分子となった高分子化合物を多糖という。1種類の[[1]]から構成されているものを[[6]]多糖、種々の[[1]]あるいはその誘導体から構成されるものを[[7]]多糖という。多糖は、細胞壁、外骨格やエネルギー貯蔵物質として利用されている。\n\n3. デンプンは、多くの高等植物における貯蔵多糖であり、α(1→4)結合したグルコースからなる[[8]]と、これにα(1→6)結合の側鎖が加わった[[9]]で構成される。\n\n4. [[10]]は動物における貯蔵多糖であり、全体として著しく分枝した巨大分子を構成している。余剰となったグルコースは、[[11]]や骨格筋において[[10]]として一時的に貯蔵し、必要に応じて分解される。`,
+            answers: {
+                "1": ["単糖"], "2": ["鏡像異性体"], "3": ["D", "d"], "4": ["アノマー"], "5": ["グリコシド"],
+                "6": ["ホモ"], "7": ["ヘテロ"], "8": ["アミロース"], "9": ["アミロペクチン"], "10": ["グリコーゲン"], "11": ["肝臓"]
+            }
+        },
+        {
+            id: "問2",
+            text: `1. タンパク質は多数のアミノ酸分子が[[1]]結合によって鎖状になることでつくられる。タンパク質の原料となるアミノ酸分子は中心となる[[2]]原子に水素原子、アミノ基、[[3]]基および[[4]]が結合した構成になっていて、アミノ酸の種類の違いは[[4]]の構造の違いによって生じる。\n\n2. タンパク質におけるアミノ酸の配列順序を表したのが[[5]]構造である。タンパク質中の規則的な構造部分を[[6]]構造といい、ペプチド鎖が右巻きにらせん状になっている[[7]]と、ペプチド鎖が折れ曲がったときに2本以上のポリペプチド鎖が横並びになっている[[8]]がある。[[6]]構造は近接したポリペプチドの主鎖状のカルボキシ基とアミノ基との間に[[9]]結合を形成して安定している。ポリペプチド鎖が複雑に折りたたまれてできた立体構造を[[10]]構造という。この折りたたみ構造には、非共有結合の[[9]]結合、イオン結合、[[11]]結合、[[12]]力とシステインの間に起こる共有結合の[[13]]結合（S-S結合）が関与している。\n\n3. 熱や強い酸性ないしアルカリ性溶液などでタンパク質を処理すると、タンパク質の[[6]]構造以上の高次構造が壊れてしまう。このことをタンパク質の[[14]]といい、タンパク質としての活性が失われてしまう。この現象は一般的に不可逆性である。また、このように活性を失うことを[[15]]という。\n\n4. 2本以上のポリペプチド鎖がそれぞれ[[10]]構造を形成し、それらが集合して1つのタンパク質を組み立てている構造を[[16]]構造という。このときそれぞれのポリペプチド鎖をサブユニットという。[[16]]構造を組み立てる際、それぞれのサブユニットは非共有結合で結ばれている。`,
+            answers: {
+                "1": ["ペプチド"], "2": ["炭素"], "3": ["カルボキシ", "カルボキシル"], "4": ["側鎖"], "5": ["一次", "1次"], "6": ["二次", "2次"],
+                "7": ["αヘリックス", "α-ヘリックス"], "8": ["βシート", "β-シート"], "9": ["水素"], "10": ["三次", "3次"], "11": ["疎水"],
+                "12": ["ファンデルワールス"], "13": ["ジスルフィド", "S-S"], "14": ["変性"], "15": ["失活"], "16": ["四次", "4次"]
+            }
+        },
+        {
+            id: "問3",
+            text: `1. 脂肪酸は、炭化水素に二重結合を1つ以上もつ[[1]]脂肪酸と二重結合を持たない[[2]]脂肪酸に分類される。[[2]]脂肪酸は、[[1]]脂肪酸より融点が[[3]]、常温で[[4]]であることが多い。一方、[[1]]脂肪酸は、常温で[[5]]であることが多い。[[2]]脂肪酸は、[[6]]性脂肪に多く含まれ、悪玉コレステロールと呼ばれる[[7]]コレステロールや中性脂肪を増やす原因となる。一方、一価[[1]]脂肪酸は[[8]]油脂に多く含まれ、善玉コレステロールと呼ばれる[[9]]コレステロールを増やす作用がある。なお、多価[[1]]脂肪酸のEPAや[[10]]は、コレステロールや中性脂肪を[[11]]作用がある。また、脳の老化を[[12]]効果もあるといわれている。しかし、[[1]]脂肪酸であってもマーガリンなどの[[13]]型[[1]]脂肪酸は、[[7]]コレステロールを増加させ、[[9]]コレステロールを減少させる。このことから、多量に摂取を続けると動脈硬化などによる虚血性心疾患のリスクを増加させるといわれている。\n\n2. リン脂質は、水になじむ[[14]]の部分となじまない[[15]]の部分の両方もつので、両親媒性脂質と呼ばれる。両親媒性物質を水に溶かすと、[[14]]基を[[16]]に、[[15]]基を[[17]]に向けて会合する。この構造を[[18]]という。リン脂質は、このようにして生体膜の[[19]]をつくり出している。`,
+            answers: {
+                "1": ["不飽和"], "2": ["飽和"], "3": ["高く", "高い"], "4": ["固体", "個体"], "5": ["液体"], "6": ["動物"],
+                "7": ["LDL"], "8": ["植物"], "9": ["HDL"], "10": ["DHA"], "11": ["減らす", "低下させる"], "12": ["防ぐ", "予防する"],
+                "13": ["トランス"], "14": ["親水性", "親水"], "15": ["疎水性", "疎水"], "16": ["外側"], "17": ["内側"], "18": ["ミセル"], "19": ["脂質二重層"]
+            }
+        },
+        {
+            id: "問4",
+            text: `1. [[1]]とは、DNAが200塩基対間隔でヒストン8量体に巻きついた構造であり、[[1]]がさらに折りたたまれた構造を[[2]]と呼ぶ。[[3]]とは、凝縮の度合いが低く、転写活性を示す[[2]]のことである。\n\n2. 細胞内と浸透圧が等しい溶液を[[4]]液と呼ぶ。赤血球を細胞内より浸透圧が[[5]]い[[6]]液に入れると、水が細胞内へ移動するため、細胞が膨張・破裂する。この現象を[[7]]と呼ぶ。\n\n3. エネルギーを必要としない輸送は、[[8]]輸送と呼ばれる。グルコースなど電荷をもたない分子の[[8]]輸送の方向は、その分子の濃度勾配のみで決まり、[[9]]側から[[10]]側へと輸送される。イオンなどの電荷をもつ分子の[[8]]輸送の方向は、濃度勾配と[[11]]からなる電気化学的勾配で決まる。\n\n4. エネルギーを必要とする輸送は、[[12]]輸送と呼ばれる。腸管上皮細胞に存在する[[13]]輸送体は、[[14]]の電気化学的勾配を利用して、細胞外の[[15]]を濃度勾配に逆らって細胞内に取り込む。[[13]]輸送体による輸送のように2種類の物質が同じ方向に輸送される[[12]]輸送の形式を[[16]]輸送という。\n\n5. 酵素は、化学反応の活性化エネルギーを[[17]]げ、反応速度を[[18]]げることのできる生体触媒である。酵素はある特定の反応しか触媒できない[[19]]特異性、ある特定の基質のみにしか作用しない[[20]]特異性を示す。大部分の酵素は主としてタンパク質からできており、加熱、界面活性剤、有機溶媒などにより[[21]]する（触媒作用を失う）。また、酵素活性に必要なタンパク質以外の化学物質である補因子のうち、酵素と非共有結合するものを[[22]]、酵素と共有結合するものを[[23]]と呼ぶ。`,
+            answers: {
+                "1": ["ヌクレオソーム"], "2": ["クロマチン", "クロマチン繊維"], "3": ["ユークロマチン"], "4": ["等張"], "5": ["低", "低く"],
+                "6": ["低張"], "7": ["浸透", "溶血"], "8": ["受動"], "9": ["高濃度"], "10": ["低濃度"], "11": ["膜電位"],
+                "12": ["能動"], "13": ["グルコース-Na+", "グルコース-Na⁺共", "グルコース-Na⁺", "Na+-グルコース"], "14": ["Na+", "Na⁺", "ナトリウムイオン"],
+                "15": ["グルコース"], "16": ["共", "共役"], "17": ["下", "下げ"], "18": ["上", "上げ"], "19": ["反応"], "20": ["基質"],
+                "21": ["失活"], "22": ["補酵素"], "23": ["補欠分子族"]
+            }
+        },
+        {
+            id: "問9",
+            text: `解糖で生じるNADHについて考えなさい。\n\n1. 乳酸発酵の過程での電子の最終的な受容体は何か。 [[1]]\n2. 好気呼吸における電子の最終的な受容体は何か。 [[2]]`,
+            answers: { "1": ["ピルビン酸"], "2": ["酸素", "O2", "O₂"] }
+        },
+        {
+            id: "問11",
+            text: `1. グルコースは、細胞の[[1]]で解糖系という代謝系で代謝され、[[2]]、ATP、NADHが生じる。[[2]]はミトコンドリアの[[3]]において脱炭酸反応により、[[4]]に変換される。[[4]]のアセチル基は、[[5]]によって代謝されて、二酸化炭素やGTP、高エネルギー電子を有するNADHやFADH₂が生じる。\n\n2. ミトコンドリアのクリステにある[[6]]では、NADHやFADH₂に由来する高エネルギー電子が、シトクロムb-c₁複合体などへ伝達される。その過程において、各複合体の[[7]]ポンプが、電子のもつエネルギーを利用して、[[7]]をミトコンドリアのマトリクス側から膜間腔側へ輸送し、[[7]]の[[8]]的勾配が形成される。この[[7]]の[[8]]的勾配を利用して、[[9]]が産生される。`,
+            answers: {
+                "1": ["細胞質基質", "細胞質", "細胞質(基質)", "細胞質（基質）"], "2": ["ピルビン酸"], "3": ["マトリックス", "ミトコンドリアマトリックス"],
+                "4": ["アセチルCoA", "アセチル-CoA"], "5": ["クエン酸回路", "TCA回路"], "6": ["電子伝達系", "電子伝達鎖"],
+                "7": ["プロトン", "水素イオン", "H+", "H⁺"], "8": ["電気化学"], "9": ["ATP"]
+            }
+        },
+        {
+            id: "問40",
+            text: `1. ヘテロ接合体において、2つの対立遺伝子の中間的な表現型を示す遺伝現象を[[ア]]という。\n\n2. 1つの遺伝子座に3つ以上の対立遺伝子が存在する場合、それらの対立遺伝子を[[イ]]遺伝子という。\n\n3. ヒトのABO型血液型において、AB型の表現型にみられるように、ヘテロ接合体の遺伝子型において、いずれの対立遺伝子の存在も表現型として示されることを[[ウ]]という。`,
+            answers: { "ア": ["不完全優性"], "イ": ["複対立"], "ウ": ["共優性"] }
+        },
+        {
+            id: "問41",
+            text: `減数分裂第一分裂では、父方と母方由来の[[A]]が対合して[[B]]を形成し、[[C]]によって染色体の一部が入れ替わることがある。そして[[A]]は離れ、分裂によって生じた細胞には[[A]]の[[D]]が含まれるので、染色体の数は[[E]]。減数分裂第二分裂では、[[F]]は[[G]]。`,
+            answers: {
+                "A": ["相同染色体"], "B": ["二価染色体"], "C": ["交差", "乗換え", "乗り換え"], "D": ["一方のみ", "一方"],
+                "E": ["半減している", "半減する", "半減"], "F": ["染色分体"], "G": ["変わらない", "変化しない"]
+            }
+        },
+        {
+            id: "問65",
+            text: `1. 神経伝達物質、ホルモン、細胞増殖因子、サイトカインなどの情報伝達物質が標的細胞にその情報を伝えるためには、その細胞にその情報を受けとる装置が必要になる。この情報を受けとる装置を[[1]]という。この[[1]]に結合する物質を[[2]]といい、そのうち、[[1]]に結合してその作用を促進するものを[[3]]、抑制する物質を[[4]]と呼ぶ。\n\n2. [[5]]に[[2]]が結合すると、チャンネルが開口し、イオンが細胞内に流入して情報が伝達される。このタイプの受容体は、シナプスにおける刺激伝達に関わっている。\n\n3. [[6]]は三量体[[7]]に共役し、細胞外の情報を細胞内に伝達する受容体である。この受容体は、細胞膜7回貫通型の単量体タンパク質である。\n\n4. ステロイドホルモン、甲状腺ホルモンなどは[[8]]のホルモンである。これらは分子量の小さな[[8]]物質であるため、細胞膜を拡散によって通過できる。そのため、受容体は細胞膜上にある必要がなく、[[9]]あるいは[[10]]として存在する。これらの受容体には、[[11]]が共通に存在し、それぞれ特定の遺伝子DNAの転写開始部位の上流にある[[12]]へ結合し、その遺伝子の発現を調節する。\n\n5. [[13]]（神経細胞）は、細胞体、[[14]]、[[15]]からなる。[[13]]は、神経系の興奮伝導の基本構成単位である。[[13]]と[[13]]との接合部を[[16]]という。同一神経細胞内で興奮が伝わることを[[17]]、シナプスを介して興奮が伝わることを[[18]]という。\n\n6. 筋肉や神経の興奮部位が静止部位に対してもつ電位差を[[19]]という。内分泌系においては、[[20]]という化学伝達物質によって情報が伝えられる。内分泌系に属する器官の細胞でつくられた[[20]]は、[[21]]から血液などに分泌され、離れた標的器官へ運ばれる。\n\n7. 生体を防御する免疫応答機構として[[22]]免疫と[[23]]免疫の2つがある。前感作が不要で、生まれながらにもっている防御機構を[[22]]免疫といい、抗原と接触することによって後天的に適応される免疫反応を[[23]]という。`,
+            answers: {
+                "1": ["受容体"], "2": ["リガンド"], "3": ["アゴニスト", "作動薬"], "4": ["アンタゴニスト", "拮抗薬"], "5": ["イオンチャンネル型受容体", "イオンチャネル型受容体"],
+                "6": ["Gタンパク質共役型受容体", "Gタンパク質結合型受容体"], "7": ["Gタンパク質"], "8": ["脂溶性"],
+                "9": ["細胞質受容体", "核内受容体"], "10": ["細胞質受容体", "核内受容体"], // 9,10順不同
+                "11": ["転写調整ドメイン", "転写調節ドメイン"], "12": ["応答配列"], "13": ["ニューロン", "神経細胞"],
+                "14": ["樹状突起", "軸索"], "15": ["樹状突起", "軸索"], // 14,15順不同
+                "16": ["シナプス"], "17": ["伝導"], "18": ["伝達"], "19": ["活動電位"], "20": ["ホルモン"], "21": ["内分泌腺"],
+                "22": ["自然", "自然免疫"], "23": ["獲得", "獲得免疫"]
+            }
+        },
+        {
+            id: "問66～68",
+            text: `家系図の特徴より判断するとき、\n\n・世代間連続発症 → [[1]]疾患\n　理由：[[2]]ため。\n　例）[[3]]\n\n・世代間不連続発症 → [[4]]疾患\n　例）[[5]]\n\n・不連続かつ男性優位 → [[6]]疾患\n　例）[[7]]\n\n<span style="color:#94a3b8; font-size:0.95rem;">【例のみ以下の選択肢から記号(A~E)で複数ある場合は続けて(例:AB)答えよ】\n(A)血友病　(B)ハンチントン病　(C)フェニルケトン尿症　(D)鎌状赤血球症　(E)デュシェンニュ型筋ジストロフィー</span>`,
+            answers: {
+                "1": ["常染色体優性遺伝性", "常染色体優性遺伝", "常染色体優性"],
+                "2": ["常染色体上の対立遺伝子のうち一方が変異しているだけで発症している", "一方が変異しているだけで発症する", "ヘテロ接合体でも発症する"],
+                "3": ["B", "b"], "4": ["常染色体劣性遺伝性", "常染色体劣性遺伝", "常染色体劣性"],
+                "5": ["CD", "C,D", "DC", "C・D", "cd"], "6": ["X連鎖性遺伝性", "X連鎖劣性遺伝", "伴性劣性遺伝"], "7": ["AE", "EA", "A,E", "A・E", "ae"]
+            }
+        }
+    ];
+
+    // --- システム状態 ---
+    let selectedQuestions = [];
+    let currentQIndex = 0;
+    let isAnswerChecked = false;
+    let totalBlanks = 0;
+    let correctBlanks = 0;
+    let audioCtx = null;
+
+    // --- 音声生成 (Web Audio API) ---
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'click') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(500, now);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'success') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.1);
+            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'partial') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); osc.frequency.setValueAtTime(523.25, now + 0.1);
+            gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'fail') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(160, now); osc.frequency.setValueAtTime(140, now + 0.1);
+            gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        }
+    }
+
+    // --- メニュー構築 ---
+    const menuGrid = document.getElementById('menu-grid');
+    const startBtn = document.getElementById('start-btn');
+    
+    quizData.forEach((q, idx) => {
+        const label = document.createElement('label');
+        label.className = 'q-checkbox-label';
+        label.innerHTML = `<input type="checkbox" value="${idx}" class="q-select-cb" checked> ${q.id}`;
+        menuGrid.appendChild(label);
+    });
+
+    const updateStartBtn = () => {
+        const checked = document.querySelectorAll('.q-select-cb:checked').length;
+        startBtn.disabled = checked === 0;
+    };
+    document.querySelectorAll('.q-select-cb').forEach(cb => cb.addEventListener('change', updateStartBtn));
+
+    document.getElementById('btn-select-all').addEventListener('click', () => {
+        document.querySelectorAll('.q-select-cb').forEach(cb => cb.checked = true);
+        updateStartBtn();
+    });
+    document.getElementById('btn-deselect-all').addEventListener('click', () => {
+        document.querySelectorAll('.q-select-cb').forEach(cb => cb.checked = false);
+        updateStartBtn();
+    });
+
+    // --- クイズ進行ロジック ---
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    startBtn.addEventListener('click', () => {
+        initAudio();
+        playSound('click');
+        
+        selectedQuestions = Array.from(document.querySelectorAll('.q-select-cb:checked'))
+                                 .map(cb => quizData[parseInt(cb.value)]);
+        currentQIndex = 0;
+        totalBlanks = 0;
+        correctBlanks = 0;
+        
+        renderQuestion();
+        switchScreen('quiz-screen');
+    });
+
+    function renderQuestion() {
+        isAnswerChecked = false;
+        const q = selectedQuestions[currentQIndex];
+        
+        document.getElementById('q-title').textContent = q.id;
+        document.getElementById('q-progress').textContent = `${currentQIndex + 1} / ${selectedQuestions.length}`;
+        
+        let htmlText = q.text.replace(/\n/g, '<br>');
+        
+        // 正規表現で [[1]] などのマーカーを入力欄に置換
+        htmlText = htmlText.replace(/\[\[(.*?)\]\]/g, (match, key) => {
+            // 特に長い記述式の入力欄はCSSで幅を調整
+            let extraStyle = key === "2" && q.id === "問66～68" ? 'style="min-width: 90%;"' : '';
+            return `
+                <span class="input-wrapper">
+                    <input type="text" class="blank-input" data-key="${key}" placeholder="(${key})" autocomplete="off" ${extraStyle}>
+                    <span class="correct-reveal"></span>
+                </span>
+            `;
+        });
+        
+        document.getElementById('q-text-area').innerHTML = htmlText;
+        
+        const actionBtn = document.getElementById('action-btn');
+        actionBtn.textContent = "解答をチェック";
+        
+        // Enterキーでチェック/次へ進むバインディング
+        document.querySelectorAll('.blank-input').forEach(inp => {
+            inp.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') actionBtn.click();
+            });
+        });
+        
+        // 最初のインプットにフォーカス
+        setTimeout(() => {
+            const firstInput = document.querySelector('.blank-input');
+            if(firstInput) firstInput.focus();
+        }, 100);
+    }
+
+    // 文字列の揺れ吸収（全角英数を半角に、空白除去、大文字化）
+    function normalizeString(str) {
+        return str.trim().replace(/[０-９ａ-ｚＡ-Ｚ]/g, function(s) {
+            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+        }).toUpperCase().replace(/\s+/g, '');
+    }
+
+    document.getElementById('action-btn').addEventListener('click', () => {
+        if (!isAnswerChecked) {
+            // 答え合わせフェーズ
+            isAnswerChecked = true;
+            const q = selectedQuestions[currentQIndex];
+            const inputs = document.querySelectorAll('.blank-input');
+            
+            let qCorrects = 0;
+            
+            // 順不同処理のための使用済みセット（問65の9・10用など）
+            let usedAnswers = new Set(); 
+
+            inputs.forEach(input => {
+                const key = input.dataset.key;
+                const userVal = normalizeString(input.value);
+                const acceptableAnswers = q.answers[key].map(normalizeString);
+                
+                let isCorrect = false;
+                
+                // 順不同ロジック（両方が同じ正解リストを持つ場合、まだ使われていない正解があればOKとする）
+                const matchedAns = acceptableAnswers.find(ans => ans === userVal);
+                if (matchedAns) {
+                    if (q.id === "問65" && (key === "9" || key === "10" || key === "14" || key === "15")) {
+                        // 順不同ペアの重複解答を防ぐ（任意）
+                        // 簡単な実装：一致していれば正解とする
+                        isCorrect = true; 
+                    } else {
+                        isCorrect = true;
+                    }
+                }
+
+                const wrapper = input.parentElement;
+                const reveal = wrapper.querySelector('.correct-reveal');
+                reveal.textContent = q.answers[key][0]; // 最初の要素を代表の正解として表示
+
+                if (isCorrect) {
+                    input.classList.add('correct');
+                    qCorrects++;
+                    correctBlanks++;
+                } else {
+                    input.classList.add('incorrect');
+                    wrapper.classList.add('show-reveal'); // 不正解時のみ答えをポップアップ
+                }
+                
+                input.readOnly = true;
+                totalBlanks++;
+            });
+
+            // 効果音判定
+            if (qCorrects === inputs.length && inputs.length > 0) {
+                playSound('success');
+            } else if (qCorrects > 0) {
+                playSound('partial');
+            } else {
+                playSound('fail');
+            }
+
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.textContent = currentQIndex === selectedQuestions.length - 1 ? "結果画面へ" : "次の問題へ";
+            
+        } else {
+            // 次へ進むフェーズ
+            playSound('click');
+            currentQIndex++;
+            if (currentQIndex < selectedQuestions.length) {
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        }
+    });
+
+    function showResult() {
+        switchScreen('result-screen');
+        document.getElementById('final-score').textContent = `${correctBlanks}/${totalBlanks}`;
+    }
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        playSound('click');
+        switchScreen('menu-screen');
+    });
+
+</script>
+
+</body>
+</html>
