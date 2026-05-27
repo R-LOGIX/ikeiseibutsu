@@ -204,4 +204,31 @@
             box-shadow: 0 2px 8px rgba(0,230,118,0.4);
         }
         .correct-reveal::after {
-            content
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -4px;
+            border-width: 4px;
+            border-style: solid;
+            border-color: var(--success-color) transparent transparent transparent;
+        }
+        .show-reveal .correct-reveal {
+            opacity: 1;
+        }
+
+        /* ボタン類 */
+        .btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #000;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: block;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 1
