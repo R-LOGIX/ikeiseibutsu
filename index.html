@@ -3,931 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>医系生物（選択式問題）</title>
+    <title>医系生物(選択式問題10年分)</title>
     <style>
         :root {
-            --bg-main: #0a0f1d;
-            --bg-card: #131c32;
-            --primary: #00f2fe;
-            --primary-glow: rgba(0, 242, 254, 0.2);
-            --accent: #9d4edd;
-            --text-main: #e2e8f0;
-            --text-muted: #94a3b8;
-            --correct: #10b981;
-            --incorrect: #ef4444;
-            --border: #223154;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-sub: #cbd5e1;
+            --accent-color: #0ea5e9;
+            --accent-hover: #0284c7;
+            --success-color: #10b981;
         }
 
         body {
-            background-color: var(--bg-main);
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgb(14, 26, 64) 0%, rgb(15, 23, 42) 90%);
             color: var(--text-main);
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 2rem 1rem;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background: var(--bg-card);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 40px var(--primary-glow);
-            border: 1px solid var(--border);
-            padding: 2rem;
-            transition: all 0.3s ease;
         }
 
         header {
+            width: 100%;
+            padding: 2rem 1rem;
             text-align: center;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 1.5rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         h1 {
-            font-size: 2rem;
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary-glow);
-            margin-bottom: 0.5rem;
-            letter-spacing: 1px;
+            margin: 0 0 1rem 0;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            color: #38bdf8;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
         }
 
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .settings-panel {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--border);
-        }
-
-        .switch-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #334155;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        .btn {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: #000;
-            font-weight: bold;
+        .shuffle-btn {
+            background: var(--accent-color);
+            color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 10px 24px;
             font-size: 1rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
         }
 
-        .btn:hover {
+        .shuffle-btn:hover {
+            background: var(--accent-hover);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.6);
         }
 
-        .btn:disabled {
-            background: #475569;
-            color: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+        .shuffle-btn:active {
+            transform: translateY(1px);
         }
 
-        .progress-bar-container {
+        #quiz-container {
             width: 100%;
-            height: 8px;
-            background-color: #1e293b;
-            border-radius: 4px;
-            margin-bottom: 2rem;
-            overflow: hidden;
-            display: none;
+            max-width: 800px;
+            padding: 2rem 1rem;
+            box-sizing: border-box;
         }
 
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            transition: width 0.3s ease;
-        }
-
-        .quiz-screen {
-            display: none;
-        }
-
-        .question-header {
-            font-size: 1.2rem;
+        .question-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
-            color: #fff;
-            line-height: 1.6;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
         }
 
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 2rem;
+        .question-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(56, 189, 248, 0.3);
         }
 
-        .option-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1rem 1.25rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-        }
-
-        .option-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--primary);
-        }
-
-        .option-card.selected {
-            background: rgba(0, 242, 254, 0.08);
-            border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
-        }
-
-        .option-card input[type="radio"], 
-        .option-card input[type="checkbox"] {
-            accent-color: var(--primary);
-            width: 18px;
-            height: 18px;
-        }
-
-        /* 特殊形式（マトリクス型）のスタイル */
-        .matrix-row {
-            background: rgba(255, 255, 255, 0.01);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
             margin-bottom: 1rem;
-        }
-        .matrix-label {
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        .matrix-options {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .matrix-opt {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 0.8rem;
         }
 
-        .result-screen {
+        .q-number {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-right: 12px;
+        }
+
+        .q-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+        }
+
+        .q-text div.options {
+            margin-top: 10px;
+            padding-left: 10px;
+            color: var(--text-sub);
+        }
+
+        .action-area {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .show-answer-btn {
+            background: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .show-answer-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .answer-area {
             display: none;
-            text-align: center;
-        }
-
-        .score-display {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 1.5rem 0;
-            text-shadow: 0 0 20px var(--primary-glow);
-        }
-
-        .review-container {
-            margin-top: 2.5rem;
-            text-align: left;
-            max-height: 50vh;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-
-        .review-item {
-            background: rgba(255, 255, 255, 0.02);
-            border-left: 4px solid #fff;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .review-item.correct { border-left-color: var(--correct); }
-        .review-item.incorrect { border-left-color: var(--incorrect); }
-
-        .review-q { font-weight: bold; margin-bottom: 0.5rem; }
-        .review-ans { font-size: 0.9rem; color: var(--text-muted); }
-        .status-badge {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .status-badge.correct { background: rgba(16, 185, 129, 0.2); color: var(--correct); }
-        .status-badge.incorrect { background: rgba(239, 68, 68, 0.2); color: var(--incorrect); }
-
-        /* スクロールバーのカスタマイズ */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-
-        .footer-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success-color);
+            border-radius: 0 8px 8px 0;
+            color: #34d399;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 印刷や小さい画面用の調整 */
+        @media (max-width: 600px) {
+            .question-card { padding: 1rem; }
+            .q-text { font-size: 0.95rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
     <header>
-        <h1>医系生物（選択式問題）</h1>
-        <p class="subtitle">全36問の専門的な演習クイズ</p>
+        <h1>医系生物(選択式問題10年分)</h1>
+        <button id="randomize-btn" class="shuffle-btn">問題をシャッフルする</button>
     </header>
 
-    <div id="start-screen">
-        <div class="settings-panel">
-            <label class="switch-container">
-                <div class="switch">
-                    <input type="checkbox" id="shuffle-toggle" checked>
-                    <span class="slider"></span>
-                </div>
-                <span>問題をランダムにシャッフルする</span>
-            </label>
-            <button class="btn" onclick="startQuiz()">クイズを開始</button>
-        </div>
-        <div style="text-align: center; color: var(--text-muted); line-height: 1.8;">
-            <p>医系生物(小代田担当分)の選択式問題10年分を網羅しています。</p>
-            <p>選択肢の順番はそのままに、問題の出題順のみをランダム化できます。</p>
-        </div>
-    </div>
+    <main id="quiz-container"></main>
 
-    <div class="progress-bar-container" id="progress-container">
-        <div class="progress-bar" id="progress-bar"></div>
-    </div>
+    <script>
+        const rawData = [
+            { num: "問５", text: "直接のエネルギー供給が必要なのはどれか。<br><div class='options'>（A）拡散<br>（B）能動輸送<br>（C）浸透<br>（D）受動輸送</div>", ans: "B" },
+            { num: "問６", text: "水は細胞が次のどの液にあるときに外へ出て行くか。<br><div class='options'>（A）低張液<br>（B）等張液<br>（C）高張液<br>（D）上のどれでもない</div>", ans: "C" },
+            { num: "問７", text: "細胞が低張液の中にあるとき、水は細胞に対してどのように動くか。<br><div class='options'>（A）細胞の外へ出ていく<br>（B）細胞の中へ入っていく<br>（C）細胞膜を通らない<br>（D）上のどれでもない</div>", ans: "B" },
+            { num: "問８", text: "酸化的リン酸化においてATP合成酵素によるATP合成の直接のエネルギー源は次のうちどれか。<br><div class='options'>（A）グルコースと他の有機化合物の酸化<br>（B）電子伝達系を下る電子の流れ<br>（C）ATP合成酵素をもつ膜を介したH⁺濃度勾配<br>（D）リン酸のADPへの転移</div>", ans: "C" },
+            { num: "問１０", text: "ミトコンドリアの電子伝達鎖に電子が流れる時、次のどれが起こるか。<br><div class='options'>（A）ミトコンドリアマトリックスのpHが上昇する。<br>（B）ATP合成酵素が能動輸送によってプロトンを輸送する。<br>（C）電子が自由エネルギーを獲得する。<br>（D）NAD⁺が酸化される。</div>", ans: "A" },
+            { num: "問１３", text: "細胞膜のNa⁺/K⁺-ATPaseによるATP加水分解を促進する薬剤を摂取すれば、次のどの現象が起こるか。<br><div class='options'>（A）ミトコンドリア内膜のpH勾配は増加する。<br>（B）ミトコンドリアのNADHをNAD⁺に酸化する速度は低下する。<br>（C）発熱が減少する。<br>（D）O₂に電子を伝達する速度は増加する。</div>", ans: "D" },
+            { num: "問１５", text: "次のうち、間違っているのはどれか。<br><div class='options'>（A）好気性生物は必要なATPの大部分を解糖系でつくる。<br>（B）解糖系でピルビン酸がつくられ、クエン酸回路でピルビン酸が消費される。<br>（C）解糖系は細胞質（細胞質基質）で進行する。<br>（D）解糖系は細胞呼吸の最初の段階となる。</div>", ans: "A" },
+            { num: "問１６", text: "次の記述の正誤を判断せよ。<br><div class='options'>（A）嫌気性生物は必要なATPを解糖系でつくる。<br>（B）解糖系でクエン酸がつくられ、クエン酸回路で消費される。<br>（C）解糖系は細胞質（細胞質基質）で進行する。<br>（D）解糖系は細胞呼吸の最初の段階となる。</div>", ans: "〇×〇〇" },
+            { num: "問２０", text: "クエン酸回路の主要な機能はどれか。<br><div class='options'>（A）CO₂を発生すること<br>（B）アセチル-CoAのアセチル基の電子をNAD⁺とFADに渡すこと<br>（C）アセチル-CoAのアセチル部分をオキサロ酢酸に酸化すること<br>（D）アセチル-CoAのアセチル部分を酸化して熱を発生すること<br>（E）過剰のピルビン酸と脂肪酸を処理すること</div>", ans: "B" },
+            { num: "問２１", text: "ファンデルワールス力と水素結合の2種類の結合のうち、（１）～（３）の部分にできるのはどちらか。記号で答えよ。<br>（A）ファンデルワールス力　　（B）水素結合　　（C）ファンデルワールス力と水素結合の両方<br><div class='options'>（１）炭素に結合した水素原子どうしの間<br>（２）窒素原子と、炭素に結合した水素原子との間<br>（３）窒素原子と、酸素に結合した水素原子との間</div>", ans: "AAC" },
+            { num: "問２２", text: "次の生物のうち、膜の不飽和リン脂質の割合が最も高いと思われるのはどれか。<br><div class='options'>A) 南極海の魚<br>B) 砂漠のヘビ<br>C) 人類<br>D) ホッキョクグマ<br>E) 100℃の温泉に住む好熱性細菌</div>", ans: "A" },
+            { num: "問２３", text: "次の文章中の｛｝の部分について正しいものを選べ。<br>１．基質濃度［S］がKₘよりもはるかに小さいとき、酵素のほとんどの活性部位に基質が｛（A）結合している／（B）結合していない｝。<br>２．基質濃度［S］がKₘよりもはるかに大きいときは、反応速度は｛（A）酵素濃度／（B）基質濃度｝によって制限される。", ans: "BA" },
+            { num: "問２４", text: "以下の文章の続きとして正しいものを選べ。また、その理由を説明せよ。<br>酵素の競合阻害剤となる薬剤は、<br><div class='options'>（A）Vₘₐₓを増加させるが、Kₘを変えない。<br>（B）Vₘₐₓを減少させるが、Kₘを変えない。<br>（C）Kₘを増加させるが、Vₘₐₓを変えない。<br>（D）Kₘを減少させるが、Vₘₐₓを変えない。<br>（E）Vₘₐₓ、Kₘともに減少させる。</div>", ans: "C" },
+            { num: "問２５", text: "以下の文章の続きとして正しいものを選べ。<br>１．酵素の活性部位は<br><div class='options'>（A）特異的基質が加えられた時のみ、形成される。<br>（B）アロステリック阻害剤の結合に直接関与する。<br>（C）ポリペプチド鎖の一次構造で隣り合ういくつかのアミノ酸残基に存在する。<br>（D）競合阻害剤と結合する。</div><br>２．酵素触媒反応の速度（v）は<br><div class='options'>（A）基質濃度が増加すると減少する。<br>（B）酵素が基質で飽和されたときに最も低い。<br>（C）1/2Vₘₐₓを与える基質濃度の関数である。<br>（D）溶液のpHとは無関係である。</div>", ans: "DC" },
+            { num: "問２６", text: "反応 E + S ⇄ ES → E + P を触媒する酵素反応に2mMの基質を加える。初期反応速度はVₘₐₓの20%である。この酵素のKₘはどれか。酵素反応速度はミカエリス・メンテン式<br>v＝Vₘₐₓ［S］/（Kₘ＋［S］）<br>で与えられる。<br><div class='options'>（A）2mM<br>（B）4mM<br>（C）8mM<br>（D）12mM<br>（E）25mM</div>", ans: "C" },
+            { num: "問２８", text: "減量希望の化学者がジニトロフェノール（DNP）を入手し、服用前に医師に相談したところ、DNPは脱共役剤で減量のための服用は危険だといわれた。もし多量のDNPを服用すれば彼女のミトコンドリアで何が起こるか。次の記述について、正しいものには○、間違っているものには×を付け、さらに間違いを正しなさい。<br><div class='options'>（A）O₂消費が減少する。<br>（B）CO₂発生が減少する。<br>（C）プロトン濃度勾配が増加する。<br>（D）NADHの酸化速度が増加する。<br>（E）体温が下がる。</div>", ans: "×××〇×" },
+            { num: "問３０", text: "次の反応のうち、エネルギー的に起こりやすい反応と共役させたときにだけ起こるのはどれか。3つ選べ。<br><div class='options'>（A）グルコース + O₂ → CO₂ + H₂O<br>（B）CO₂ + H₂O → グルコース + O₂<br>（C）ヌクレオチド塩基 → ヌクレオチド三リン酸<br>（D）ヌクレオチド三リン酸 → DNA<br>（E）ADP + Pᵢ → ATP</div>", ans: "BCE" },
+            { num: "問３１", text: "細胞が行う過程で、ヒトが呼吸で吐き出す二酸化炭素が生じる過程はどの過程か。2つ選べ。<br><div class='options'>（A）解糖<br>（B）乳酸発酵<br>（C）ピルビン酸からアセチルCoAへの変換<br>（D）クエン酸回路<br>（E）電子伝達</div>", ans: "CD" },
+            { num: "問３２", text: "異化過程に由来するほとんどのCO₂は次のどの過程で放出されるか。<br><div class='options'>（A）解糖<br>（B）クエン酸回路<br>（C）乳酸発酵<br>（D）電子伝達</div>", ans: "B" },
+            { num: "問３３", text: "ヒトが呼吸している酸素のほとんどは次のどの過程で消費されるか。<br><div class='options'>（A）解糖<br>（B）乳酸発酵<br>（C）ピルビン酸からアセチルCoAへの変換<br>（D）クエン酸回路<br>（E）電子伝達</div>", ans: "E" },
+            { num: "問３４", text: "好気的な酸化的リン酸化で機能する電子伝達鎖の最終的な電子伝達体は、次のうちどれか。<br><div class='options'>（A）酸素<br>（B）水<br>（C）NAD⁺<br>（D）ピルビン酸</div>", ans: "A" },
+            { num: "問３５", text: "次の文を正しく完成するように選択肢から1つ選べ。<br>Aとaが同じ遺伝子の異なる対立遺伝子であるとき、Aaの遺伝子型の個体は、<br><div class='options'>（A）ホモ接合体である。<br>（B）ヘテロ接合体である。<br>（C）優性である。<br>（D）劣性である。</div>", ans: "B" },
+            { num: "問３８", text: "ある子供がAB型の血液型をもつとすると、その両親についてはどのようなことがいえるか。正しい文を選べ。<br><div class='options'>（A）両親ともヘテロ接合体である。<br>（B）両親ともA型かO型でありうるが、AB型ではない。<br>（C）両親ともAB型である。<br>（D）両親ともO型ではない。</div>", ans: "D" },
+            { num: "問４５", text: "二遺伝子雑種交雑のF₂世代（雑種第二代）について正しいのはどれか。<br><div class='options'>（A）もし遺伝子座がつながっていれば、4つの表現型が比率9：3：3：1で現れる。<br>（B）もし遺伝子座がつながっていなければ、4つの表現型が比率9：3：3：1で現れる。<br>（C）もし遺伝子座がつながっていなければ、2つの表現型が比率3：1で現れる。<br>（D）もし遺伝子座がつながっていれば、3つの表現型が比率1：2：1で現れる。</div>", ans: "B" },
+            { num: "問４６", text: "連鎖している遺伝子について正しいのはどれか。<br><div class='options'>（A）染色体上で互いに隣接していなければならない。<br>（B）互いに独立して分離される対立遺伝子をもつ。<br>（C）同じ染色体上にある。<br>（D）常に交差する。</div>", ans: "C" },
+            { num: "問４７", text: "大腸菌培養による組換えDNAの大量調整を何というか。<br><div class='options'>（A）PCR<br>（B）DNAポリメラーゼ<br>（C）DNAライゲーション<br>（D）DNAクローニング</div>", ans: "D" },
+            { num: "問４８", text: "色素性乾皮症の患者が太陽光に露光すると皮膚がんまで進行するが、これは以下の欠損による。<br><div class='options'>（A）複製複合体の酵素プライマーゼ<br>（B）DNAポリメラーゼ<br>（C）ヌクレオチド除去修復酵素<br>（D）ヘリカーゼ</div>", ans: "C" },
+            { num: "問４９", text: "色素性乾皮症の患者はUVに露光するとDNA障害を受けるが、これはUV光により、<br><div class='options'>（A）DNA中にリボース三量体ができるから。<br>（B）DNA中にチミン二量体ができるから。<br>（C）DNA中にデオキシリボース二量体ができるから。<br>（D）DNA中のリン酸基間に酸無水物結合ができるから。</div>", ans: "B" },
+            { num: "問５０", text: "DNAの複製に関して正しい記述はどれか。<br><div class='options'>（A）細胞周期のM期で行われる。<br>（B）5’から3’方向へコピーするDNA鋳型が必要である。<br>（C）染色体上の複製起点から両方向に進む。<br>（D）新規に合成した1本の二重らせんと2本の親鎖からなる二重らせんをつくる。</div>", ans: "C" },
+            { num: "問５１", text: "DNAの複製に関して正しい記述はどれか。<br><div class='options'>（A）細胞周期のM期で行われる。<br>（B）3’から5’方向へコピーするDNA鋳型が必要である。<br>（C）染色体上の複製起点から一方向に進む。<br>（D）新規に合成した1本の二重らせんと2本の親鎖からなる二重らせんをつくる。</div>", ans: "B" },
+            { num: "問５２", text: "DNAポリメラーゼ活性に必要なのはどれか。<br><div class='options'>（A）dUTP<br>（B）5’-ヒドロキシ基<br>（C）3’-ヒドロキシ基<br>（D）CTP</div>", ans: "C" },
+            { num: "問５３", text: "岡崎フラグメントに関して正しい記述はどれか。<br><div class='options'>（A）複製のときラギング鎖でつくられる。<br>（B）タンパク質のアミノ酸をコードしていないDNA領域である。<br>（C）5’末端に少数のデオキシリボヌクレオチドをもつ比較的短いポリリボヌクレオチドである。<br>（D）選択的スプライシングにより生じる生成物である。</div>", ans: "A" },
+            { num: "問５４", text: "DNAを特異的な配列で切断するものはどれか。<br><div class='options'>（A）DNAリガーゼ<br>（B）DNAポリメラーゼ<br>（C）制限酵素<br>（D）ヘリカーゼ</div>", ans: "C" },
+            { num: "問５５", text: "遺伝子の両端のDNA配列が判明している場合、数時間で数十億倍に遺伝子を増幅する方法はどれか。<br><div class='options'>（A）PCR<br>（B）DNAポリメラーゼ<br>（C）DNAライゲーション<br>（D）DNAクローニング</div>", ans: "A" },
+            { num: "問５７", text: "DNAのリーディング鎖とラギング鎖の複製方法が異なる根本的な理由は次のうちどれか。<br><div class='options'>（A）複製の開始が5’末端のみから起こること。<br>（B）ヘリカーゼと1本鎖結合タンパク質が5’末端で働いていること。<br>（C）DNAポリメラーゼが新たなヌクレオチドを伸長中の鎖の3’末端にしか付加できないこと。<br>（D）DNAリガーゼが3’→5’方向にしか働かないこと。</div>", ans: "C" },
+            { num: "問６４", text: "5’-AGCCAATT-3’配列を含むDNAフラグメントを転写の鋳型として使えば、転写されるRNA配列はどれか。<br><div class='options'>（A）5’-UCGGUUAA-3’<br>（B）5’-AAUUGGCU-3’<br>（C）5’-AGCCAAUU-3’<br>（D）5’-UUAACCGA-3’</div>", ans: "B" }
+        ];
 
-    <div id="quiz-screen" class="quiz-screen">
-        <div class="question-header" id="question-text"></div>
-        <div class="options-container" id="options-box"></div>
-        <div class="footer-actions">
-            <span id="question-counter" style="color: var(--text-muted);"></span>
-            <button class="btn" id="next-btn" onclick="submitAnswer()">回答を確定</button>
-        </div>
-    </div>
+        let questions = [...rawData];
 
-    <div id="result-screen" class="result-screen">
-        <h2>演習完了</h2>
-        <div class="score-display" id="score-text">0 / 0</div>
-        <p id="evaluation-text" style="margin-bottom: 1.5rem; font-size: 1.1rem;"></p>
-        <button class="btn" onclick="resetQuiz()">最初から解き直す</button>
-
-        <div class="review-container" id="review-box">
-            <h3>解答レビュー</h3>
-            </div>
-    </div>
-</div>
-
-<script>
-    // 全36問の問題データ定義
-    const rawQuestions = [
-        {
-            id: "問５",
-            type: "single",
-            question: "問５　直接のエネルギー供給が必要なのはどれか。",
-            options: ["（A）拡散", "（B）能動輸送", "（C）浸透", "（D）受動輸送"],
-            answer: 1 // B
-        },
-        {
-            id: "問６",
-            type: "single",
-            question: "問６　水は細胞が次のどの液にあるときに外へ出て行くか。",
-            options: ["（A）低張液", "（B）等張液", "（C）高張液", "（D）上のどれでもない"],
-            answer: 2 // C
-        },
-        {
-            id: "問７",
-            type: "single",
-            question: "問７　細胞が低張液の中にあるとき、水は細胞に対してどのように動くか。",
-            options: ["（A）細胞の外へ出ていく", "（B）細胞の中へ入っていく", "（C）細胞膜を通らない", "（D）上のどれでもない"],
-            answer: 1 // B
-        },
-        {
-            id: "問８",
-            type: "single",
-            question: "問８　酸化的リン酸化においてATP合成酵素によるATP合成の直接のエネルギー源は次のうちどれか。",
-            options: [
-                "（A）グルコースと他の有機化合物の酸化",
-                "（B）電子伝達系を下る電子の流れ",
-                "（C）ATP合成酵素をもつ膜を介したH⁺濃度勾配",
-                "（D）リン酸のADPへの転移"
-            ],
-            answer: 2 // C
-        },
-        {
-            id: "問１０",
-            type: "single",
-            question: "問１０　ミトコンドリアの電子伝達鎖に電子が流れる時、次のどれが起こるか。",
-            options: [
-                "（A）ミトコンドリアマトリックスのpHが上昇する。",
-                "（B）ATP合成酵素が能動輸送によってプロトンを輸送する。",
-                "（C）電子が自由エネルギーを獲得する。",
-                "（D）NAD⁺が酸化される。"
-            ],
-            answer: 0 // A
-        },
-        {
-            id: "問１３",
-            type: "single",
-            question: "問１３　細胞膜のNa⁺/K⁺-ATPaseによるATP加水分解を促進する薬剤を摂取すれば、次のどの現象が起こるか。",
-            options: [
-                "（A）ミトコンドリア内膜のpH勾配は増加する。",
-                "（B）ミトコンドリアのNADHをNAD⁺に酸化する速度は低下する。",
-                "（C）発熱が減少する。",
-                "（D）O₂に電子を伝達する速度は増加する。"
-            ],
-            answer: 3 // D
-        },
-        {
-            id: "問１５",
-            type: "single",
-            question: "問１５　次のうち、間違っているのはどれか。",
-            options: [
-                "（A）好気性生物は必要なATPの大部分を解糖系でつくる。",
-                "（B）解糖系でピルビン酸がつくられ、クエン酸回路でピルビン酸が消費される。",
-                "（C）解糖系は細胞質（細胞質基質）で進行する。",
-                "（D）解糖系は細胞呼吸の最初の段階となる。"
-            ],
-            answer: 0 // A
-        },
-        {
-            id: "問１６",
-            type: "matrix",
-            question: "問１６　次の記述の正誤を判断せよ。",
-            subQuestions: [
-                { label: "（A）嫌気性生物は必要なATPを解糖系でつくる。", options: ["〇", "×"], answer: 0 },
-                { label: "（B）解糖系でクエン酸がつくられ、クエン酸回路で消費される。", options: ["〇", "×"], answer: 1 },
-                { label: "（C）解糖系は細胞質（細胞質基質）で進行する。", options: ["〇", "×"], answer: 0 },
-                { label: "（D）解糖系は細胞呼吸の最初の段階となる。", options: ["〇", "×"], answer: 0 }
-            ]
-        },
-        {
-            id: "問２０",
-            type: "single",
-            question: "問２０　クエン酸回路の主要な機能はどれか。",
-            options: [
-                "（A）CO₂を発生すること",
-                "（B）アセチル-CoAのアセチル基の電子をNAD⁺とFADに渡すこと",
-                "（C）アセチル-CoAのアセチル部分をオキサロ酢酸に酸化すること",
-                "（D）アセチル-CoAのアセチル部分を酸化して熱を発生すること",
-                "（E）過剰のピルビン酸と脂肪酸を処理すること"
-            ],
-            answer: 1 // B
-        },
-        {
-            id: "問２１",
-            type: "matrix",
-            question: "問２１　ファンデルワールス力と水素結合の2種類の結合のうち、（１）～（３）の部分にできるのはどちらか。記号で答えよ。<br><small>（A）ファンデルワールス力　（B）水素結合　（C）ファンデルワールス力と水素結合の両方</small>",
-            subQuestions: [
-                { label: "（１）炭素に結合した水素原子どうしの間", options: ["（A）", "（B）", "（C）"], answer: 0 },
-                { label: "（２）窒素原子と、炭素に結合した水素原子との間", options: ["（A）", "（B）", "（C）"], answer: 0 },
-                { label: "（３）窒素原子と、酸素に結合した水素原子との間", options: ["（A）", "（B）", "（C）"], answer: 2 }
-            ]
-        },
-        {
-            id: "問22",
-            type: "single",
-            question: "問22　次の生物のうち、膜の不飽和リン脂質の割合が最も高いと思われるのはどれか。",
-            options: ["A) 南極海の魚", "B) 砂漠のヘビ", "C) 人類", "D) ホッキョクグマ", "E) 100℃の温泉に住む好熱性細菌"],
-            answer: 0 // A
-        },
-        {
-            id: "問２３",
-            type: "matrix",
-            question: "問２３　次の文章中の｛｝の部分について正しいものを選べ。",
-            subQuestions: [
-                { label: "１．基質濃度［S］がKₘよりもはるかに小さいとき、酵素のほとんどの活性部位に基質が：", options: ["｛（A）結合している｝", "｛（B）結合していない｝"], answer: 1 },
-                { label: "２．基質濃度［S］がKₘよりもはるかに大きいときは、反応速度は：", options: ["｛（A）酵素濃度｝によって制限される", "｛（B）基質濃度｝によって制限される"], answer: 0 }
-            ]
-        },
-        {
-            id: "問２４",
-            type: "single",
-            question: "問２４　以下の文章の続きとして正しいものを選べ。また、その理由を説明せよ。<br><strong>酵素の競合阻害剤となる薬剤は、</strong>",
-            options: [
-                "（A）Vₘₐₓを増加させるが、Kₘを変えない。",
-                "（B）Vₘₐₓを減少させるが、Kₘを変えない。",
-                "（C）Kₘを増加させるが、Vₘₐₓを変えない。",
-                "（D）Kₘを減少させるが、Vₘₐₓを変えない。",
-                "（E）Vₘₐₓ、Kₘともに減少させる。"
-            ],
-            answer: 2 // C
-        },
-        {
-            id: "問２５",
-            type: "matrix",
-            question: "問２５　以下の文章の続きとして正しいものを選べ。",
-            subQuestions: [
-                { 
-                    label: "１．酵素の活性部位は：", 
-                    options: [
-                        "（A）特異的基質が加えられた時のみ、形成される。",
-                        "（B）アロステリック阻害剤の結合に直接関与する。",
-                        "（C）ポリペプチド鎖の一次構造で隣り合ういくつかのアミノ酸残基に存在する。",
-                        "（D）競合阻害剤と結合する。"
-                    ], 
-                    answer: 3 
-                },
-                { 
-                    label: "２．酵素触媒反応の速度（v）は：", 
-                    options: [
-                        "（A）基質濃度が増加すると減少する。",
-                        "（B）酵素が基質で飽和されたときに最も低い。",
-                        "（C）1/2Vₘₐₓを与える基質濃度の関数である。",
-                        "（D）溶液のpHとは無関係である。"
-                    ], 
-                    answer: 2 
-                }
-            ]
-        },
-        {
-            id: "問２６",
-            type: "single",
-            question: "問２６　反応 E + S ⇄ ES → E + P を触媒する酵素反応に2mM of 基質を加える。初期反応速度はVₘₐₓの20%である。この酵素のKₘはどれか。酵素反応速度はミカエリス・メンテン式 v＝Vₘₐₓ［S］/（Kₘ＋［S］）で与えられる。",
-            options: ["（A）2mM", "（B）4mM", "（C）8mM", "（D）12mM", "（E）25mM"],
-            answer: 2 // C
-        },
-        {
-            id: "問２８",
-            type: "matrix",
-            question: "問２８　もし多量のジニトロフェノール（DNP）を服用すれば彼女のミトコンドリアで何が起こるか。次の記述について正誤（○・×）を判定せよ。",
-            subQuestions: [
-                { label: "（A）O₂消費が減少する。", options: ["○", "×"], answer: 1 },
-                { label: "（B）CO₂発生が減少する。", options: ["○", "×"], answer: 1 },
-                { label: "（C）プロトン濃度勾配が増加する。", options: ["○", "×"], answer: 1 },
-                { label: "（D）NADHの酸化速度が増加する。", options: ["○", "×"], answer: 0 },
-                { label: "（E）体温が下がる。", options: ["○", "×"], answer: 1 }
-            ]
-        },
-        {
-            id: "問３０",
-            type: "multiple",
-            question: "問３０　次の反応のうち、エネルギー的に起こりやすい反応と共役させたときにだけ起こるのはどれか。<strong>3つ選べ。</strong>",
-            options: [
-                "（A）グルコース + O₂ → CO₂ + H₂O",
-                "（B）CO₂ + H₂O → グルコース + O₂",
-                "（C）ヌクレオチド塩基 → ヌクレオチド三リン酸",
-                "（D）ヌクレオチド三リン酸 → DNA",
-                "（E）ADP + Pᵢ → ATP"
-            ],
-            answers: [1, 2, 4] // B, C, E
-        },
-        {
-            id: "問３１",
-            type: "multiple",
-            question: "問３１　細胞が行う過程で、ヒトが呼吸で吐き出す二酸化炭素が生じる過程はどの過程か。<strong>2つ選べ。</strong>",
-            options: [
-                "（A）解糖",
-                "（B）乳酸発酵",
-                "（C）ピルビン酸からアセチルCoAへの変換",
-                "（D）クエン酸回路",
-                "（E）電子伝達"
-            ],
-            answers: [2, 3] // C, D
-        },
-        {
-            id: "問３２",
-            type: "single",
-            question: "問３２　異化過程に由来するほとんどのCO₂は次のどの過程で放出されるか。",
-            options: ["（A）解糖", "（B）クエン酸回路", "（C）乳酸発酵", "（D）電子伝達"],
-            answer: 1 // B
-        },
-        {
-            id: "問３３",
-            type: "single",
-            question: "問３３　ヒトが呼吸している酸素のほとんどは次のどの過程で消費されるか。",
-            options: ["（A）解糖", "（B）乳酸発酵", "（C）ピルビン酸からアセチルCoAへの変換", "（D）クエン酸回路", "（E）電子伝達"],
-            answer: 4 // E
-        },
-        {
-            id: "問３４",
-            type: "single",
-            question: "問３４　好気的な酸化的リン酸化で機能する電子伝達鎖の最終的な電子伝達体は、次のうちどれか。",
-            options: ["（A）酸素", "（B）水", "（C）NAD⁺", "（D）ピルビン酸"],
-            answer: 0 // A
-        },
-        {
-            id: "問３５",
-            type: "single",
-            question: "問３５　次の文を正しく完成するように選択肢から1つ選べ。<br><strong>Aとaが同じ遺伝子の異なる対立遺伝子であるとき、Aaの遺伝子型の個体は、</strong>",
-            options: ["（A）ホモ接合体である。", "（B）ヘテロ接合体である。", "（C）優性である。", "（D）劣性である。"],
-            answer: 1 // B
-        },
-        {
-            id: "問３８",
-            type: "single",
-            question: "問３８　ある子供がAB型の血液型をもつとすると、その両親についてはどのようなことがいえるか。正しい文を選べ。",
-            options: [
-                "（A）両親ともヘテロ接合体である。",
-                "（B）両親ともA型かO型でありうるが、AB型ではない。",
-                "（C）両親ともAB型である。",
-                "（D）両親ともO型ではない。"
-            ],
-            answer: 3 // D
-        },
-        {
-            id: "問４５",
-            type: "single",
-            question: "問４５　二遺伝子雑種交雑のF₂世代（雑種第二代）について正しいのはどれか。",
-            options: [
-                "（A）もし遺伝子座がつながっていれば、4つの表現型が比率9：3：3：1で現れる。",
-                "（B）もし遺伝子座がつながっていなければ、4つの表現型が比率9：3：3：1で現れる。",
-                "（C）もし遺伝子座がつながっていなければ、2つの表現型が比率3：1で現れる。",
-                "（D）もし遺伝子座がつながっていれば、3つの表現型が比率1：2：1で現れる。"
-            ],
-            answer: 1 // B
-        },
-        {
-            id: "問４６",
-            type: "single",
-            question: "問４６　連鎖している遺伝子について正しいのはどれか。",
-            options: [
-                "（A）染色体上で互いに隣接していなければならない。",
-                "（B）互いに独立して分離される対立遺伝子をもつ。",
-                "（C）同じ染色体上にある。",
-                "（D）常に交差する。"
-            ],
-            answer: 2 // C
-        },
-        {
-            id: "問４７",
-            type: "single",
-            question: "問４７　大腸菌培養による組換えDNAの大量調整を何というか。",
-            options: ["（A）PCR", "（B）DNAポリメラーゼ", "（C）DNAライゲーション", "（D）DNAクローニング"],
-            answer: 3 // D
-        },
-        {
-            id: "問４８",
-            type: "single",
-            question: "問４８　色素性乾皮症の患者が太陽光に露光すると皮膚がんまで進行するが、これは以下の欠損による。",
-            options: ["（A）複製複合体の酵素プライマーゼ", "（B）DNAポリメラーゼ", "（C）ヌクレオチド除去修復酵素", "（D）ヘリカーゼ"],
-            answer: 2 // C
-        },
-        {
-            id: "問４９",
-            type: "single",
-            question: "問４９　色素性乾皮症の患者はUVに露光するとDNA障害を受けるが、これはUV光により、",
-            options: [
-                "（A）DNA中にリボース三量体ができるから。",
-                "（B）DNA中にチミン二量体ができるから。",
-                "（C）DNA中にデオキシリボース二量体ができるから。",
-                "（D）DNA中のリン酸基間に酸無水物結合ができるから。"
-            ],
-            answer: 1 // B
-        },
-        {
-            id: "問５０",
-            type: "single",
-            question: "問５０　DNAの複製に関して正しい記述はどれか。",
-            options: [
-                "（A）細胞周期のM期で行われる。",
-                "（B）5’から3’方向へコピーするDNA鋳型が必要である。",
-                "（C）染色体上の複製起点から両方向に進む。",
-                "（D）新規に合成した1本の二重らせんと2本の親鎖からなる二重らせんをつくる。"
-            ],
-            answer: 2 // C
-        },
-        {
-            id: "問５１",
-            type: "single",
-            question: "問５１　DNAの複製に関して正しい記述はどれか。",
-            options: [
-                "（A）細胞周期のM期で行われる。",
-                "（B）3’から5’方向へコピーするDNA鋳型が必要である。",
-                "（C）染色体上の複製起点から一方向に進む。",
-                "（D）新規に合成した1本の二重らせんと2本の親鎖からなる二重らせんをつくる。"
-            ],
-            answer: 1 // B
-        },
-        {
-            id: "問５２",
-            type: "single",
-            question: "問５２　DNAポリメラーゼ活性に必要なのはどれか。",
-            options: ["（A）dUTP", "（B）5’-ヒドロキシ基", "（C）3’-ヒドロキシ基", "（D）CTP"],
-            answer: 2 // C
-        },
-        {
-            id: "問５３",
-            type: "single",
-            question: "問５３　岡崎フラグメントに関して正しい記述はどれか。",
-            options: [
-                "（A）複製のときラギング鎖でつくられる。",
-                "（B）タンパク質のアミノ酸をコードしていないDNA領域である。",
-                "（C）5’末端に少数のデオキシリボヌクレオチドをもつ比較的短いポリリボヌクレオチドである。",
-                "（D）選択的スプライシングにより生じる生成物である。"
-            ],
-            answer: 0 // A
-        },
-        {
-            id: "問５４",
-            type: "single",
-            question: "問５４　DNAを特異的な配列で切断するものはどれか。",
-            options: ["（A）DNAリガーゼ", "（B）DNAポリメラーゼ", "（C）制限酵素", "（D）ヘリカーゼ"],
-            answer: 2 // C
-        },
-        {
-            id: "問５５",
-            type: "single",
-            question: "問５５　遺伝子の両端のDNA配列が判明している場合、数時間で数十億倍に遺伝子を増幅する方法はどれか。",
-            options: ["（A）PCR", "（B）DNAポリメラーゼ", "（C）DNAライゲーション", "（D）DNAクローニング"],
-            answer: 0 // A
-        },
-        {
-            id: "問５７",
-            type: "single",
-            question: "問５７　DNAのリーディング鎖とラギング鎖の複製方法が異なる根本的な理由は次のうちどれか。",
-            options: [
-                "（A）複製の開始が5’末端のみから起こること。",
-                "（B）ヘリカーゼと1本鎖結合タンパク質が5’末端で働いていること。",
-                "（C）DNAポリメラーゼが新たなヌクレオチドを伸長中の鎖の3’末端にしか付加できないこと。",
-                "（D）DNAリガーゼが3’→5’方向にしか働かないこと。"
-            ],
-            answer: 2 // C
-        },
-        {
-            id: "問６４",
-            type: "single",
-            question: "問６４　5’-AGCCAATT-3’配列を含むDNAフラグメントを転写の鋳型として使えば、転写されるRNA配列はどれか。",
-            options: ["（A）5’-UCGGUUAA-3’", "（B）5’-AAUUGGCU-3’", "（C）5’-AGCCAAUU-3’", "（D）5’-UUAACCGA-3’"],
-            answer: 1 // B
-        }
-    ];
-
-    let currentQuestions = [];
-    let currentIndex = 0;
-    let score = 0;
-    let userAnswers = [];
-
-    function shuffleArray(array) {
-        let shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-    }
-
-    function startQuiz() {
-        const isShuffle = document.getElementById('shuffle-toggle').checked;
-        currentQuestions = isShuffle ? shuffleArray(rawQuestions) : [...rawQuestions];
-        currentIndex = 0;
-        score = 0;
-        userAnswers = [];
-
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('quiz-screen').style.display = 'block';
-        document.getElementById('progress-container').style.display = 'block';
-
-        showQuestion();
-    }
-
-    function showQuestion() {
-        const q = currentQuestions[currentIndex];
-        document.getElementById('question-counter').innerText = `問題 ${currentIndex + 1} / ${currentQuestions.length} (${q.id})`;
-        document.getElementById('question-text').innerHTML = q.question;
+        // Web Audio API Context (ユーザーアクション後に初期化)
+        let audioCtx;
         
-        // 進捗バーの更新
-        const progressPercent = (currentIndex / currentQuestions.length) * 100;
-        document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
 
-        const optionsBox = document.getElementById('options-box');
-        optionsBox.innerHTML = '';
+        // 解答表示時の音（ピロリン♪）
+        function playRevealSound() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+            osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1); // A6
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
 
-        if (q.type === 'single') {
-            q.options.forEach((opt, idx) => {
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.onclick = () => selectSingle(idx);
-                card.innerHTML = `<input type="radio" name="quiz-opt" id="opt-${idx}"> <label for="opt-${idx}" style="cursor:pointer; width:100%;">${opt}</label>`;
-                optionsBox.appendChild(card);
-            });
-        } else if (q.type === 'multiple') {
-            q.options.forEach((opt, idx) => {
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.onclick = () => toggleMultiple(card, idx);
-                card.innerHTML = `<input type="checkbox" name="quiz-opt" id="opt-${idx}" onclick="event.stopPropagation();"> <label for="opt-${idx}" style="cursor:pointer; width:100%;">${opt}</label>`;
-                optionsBox.appendChild(card);
-            });
-        } else if (q.type === 'matrix') {
-            q.subQuestions.forEach((sub, subIdx) => {
-                const row = document.createElement('div');
-                row.className = 'matrix-row';
-                
-                let optHtml = '';
-                sub.options.forEach((opt, optIdx) => {
-                    optHtml += `
-                        <label class="matrix-opt">
-                            <input type="radio" name="matrix-${currentIndex}-${subIdx}" value="${optIdx}">
-                            <span>${opt}</span>
-                        </label>
-                    `;
-                });
+        // シャッフル時の音（シュッ！）
+        function playShuffleSound() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.15);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
 
-                row.innerHTML = `
-                    <div class="matrix-label">${sub.label}</div>
-                    <div class="matrix-options">${optHtml}</div>
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById("quiz-container");
+            container.innerHTML = ""; // クリア
+            
+            questions.forEach((q, index) => {
+                const card = document.createElement("div");
+                card.className = "question-card";
+                card.style.animationDelay = `${index * 0.05}s`;
+
+                card.innerHTML = `
+                    <div class="q-header">
+                        <span class="q-number">${q.num}</span>
+                    </div>
+                    <div class="q-text">${q.text}</div>
+                    <div class="action-area">
+                        <button class="show-answer-btn">解答を表示</button>
+                    </div>
+                    <div class="answer-area">解答： ${q.ans}</div>
                 `;
-                optionsBox.appendChild(row);
-            });
-        }
-    }
 
-    function selectSingle(idx) {
-        const cards = document.querySelectorAll('.option-card');
-        cards.forEach((c, i) => {
-            if(i === idx) {
-                c.classList.add('selected');
-                c.querySelector('input').checked = true;
-            } else {
-                c.classList.remove('selected');
-            }
-        });
-    }
-
-    function toggleMultiple(card, idx) {
-        const chk = card.querySelector('input');
-        chk.checked = !chk.checked;
-        if(chk.checked) {
-            card.classList.add('selected');
-        } else {
-            card.classList.remove('selected');
-        }
-    }
-
-    function submitAnswer() {
-        const q = currentQuestions[currentIndex];
-        let answerData = null;
-        let isCorrect = false;
-
-        if (q.type === 'single') {
-            const selected = document.querySelector('.option-card.selected input');
-            if (!selected) { alert('選択肢を選んでください。'); return; }
-            const idx = parseInt(selected.id.split('-')[1]);
-            answerData = idx;
-            isCorrect = (idx === q.answer);
-        } else if (q.type === 'multiple') {
-            const checkedBoxes = document.querySelectorAll('.option-card input:checked');
-            if (checkedBoxes.length === 0) { alert('少なくとも1つの選択肢を選んでください。'); return; }
-            const idxs = Array.from(checkedBoxes).map(cb => parseInt(cb.id.split('-')[1]));
-            answerData = idxs;
-            
-            // 配列の一致確認
-            isCorrect = idxs.length === q.answers.length && idxs.every(v => q.answers.includes(v));
-        } else if (q.type === 'matrix') {
-            const answers = [];
-            let allSelected = true;
-            q.subQuestions.forEach((sub, subIdx) => {
-                const checked = document.querySelector(`input[name="matrix-${currentIndex}-${subIdx}"]:checked`);
-                if(!checked) { allSelected = false; }
-                else { answers.push(parseInt(checked.value)); }
-            });
-
-            if (!allSelected) { alert('すべての項目の回答を選択してください。'); return; }
-            answerData = answers;
-            isCorrect = answers.every((ans, sIdx) => ans === q.subQuestions[sIdx].answer);
-        }
-
-        if(isCorrect) score++;
-        userAnswers.push({ question: q, userAns: answerData, isCorrect: isCorrect });
-
-        currentIndex++;
-        if (currentIndex < currentQuestions.length) {
-            showQuestion();
-        } else {
-            showResults();
-        }
-    }
-
-    function showResults() {
-        document.getElementById('quiz-screen').style.display = 'none';
-        document.getElementById('progress-container').style.display = 'none';
-        document.getElementById('result-screen').style.display = 'block';
-
-        document.getElementById('score-text').innerText = `${score} / ${currentQuestions.length}`;
-        
-        const percent = (score / currentQuestions.length) * 100;
-        let evalText = "";
-        if(percent === 100) evalText = "素晴らしい！パーフェクトです！医系生物学のマスターですね。";
-        else if(percent >= 80) evalText = "優秀な成績です！合格水準を十分に満たしています。";
-        else if(percent >= 60) evalText = "基本は押さえられています。間違えた箇所を復習しましょう。";
-        else evalText = "もう一度教科書やノートを読み直して、再度チャレンジしてみましょう！";
-        
-        document.getElementById('evaluation-text').innerText = evalText;
-
-        const reviewBox = document.getElementById('review-box');
-        // 既存のレビューアイテムをリセット（タイトル以外）
-        while (reviewBox.childNodes.length > 2) {
-            reviewBox.removeChild(reviewBox.lastChild);
-        }
-
-        userAnswers.forEach((item, idx) => {
-            const div = document.createElement('div');
-            div.className = `review-item ${item.isCorrect ? 'correct' : 'incorrect'}`;
-            
-            let displayAns = "";
-            if(item.question.type === 'single') {
-                displayAns = `あなたの回答: ${item.question.options[item.userAns]} / 正解: ${item.question.options[item.question.answer]}`;
-            } else if (item.question.type === 'multiple') {
-                const uStr = item.userAns.map(i => item.question.options[i]).join(', ');
-                const cStr = item.question.answers.map(i => item.question.options[i]).join(', ');
-                displayAns = `あなたの回答: [${uStr}] / 正解: [${cStr}]`;
-            } else if (item.question.type === 'matrix') {
-                displayAns = "各項目の結果:<br>";
-                item.question.subQuestions.forEach((sub, sIdx) => {
-                    const uOpt = sub.options[item.userAns[sIdx]];
-                    const cOpt = sub.options[sub.answer];
-                    displayAns += `・${sub.label} ➔ あなた: ${uOpt} (正解: ${cOpt})<br>`;
+                // 解答表示ボタンのイベント
+                const btn = card.querySelector(".show-answer-btn");
+                const ansArea = card.querySelector(".answer-area");
+                btn.addEventListener("click", () => {
+                    if (ansArea.style.display === "block") return;
+                    ansArea.style.display = "block";
+                    btn.style.display = "none";
+                    playRevealSound();
                 });
-            }
 
-            div.innerHTML = `
-                <div class="status-badge ${item.isCorrect ? 'correct' : 'incorrect'}">${item.isCorrect ? '正解' : '不正解'}</div>
-                <div class="review-q">${idx + 1}. ${item.question.question}</div>
-                <div class="review-ans">${displayAns}</div>
-            `;
-            reviewBox.appendChild(div);
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById("randomize-btn").addEventListener("click", () => {
+            playShuffleSound();
+            shuffleArray(questions);
+            renderQuiz();
+            
+            // スクロールを一番上に戻す
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-    }
 
-    function resetQuiz() {
-        document.getElementById('result-screen').style.display = 'none';
-        document.getElementById('start-screen').style.display = 'block';
-    }
-</script>
-
+        // 初回描画
+        renderQuiz();
+    </script>
 </body>
 </html>
